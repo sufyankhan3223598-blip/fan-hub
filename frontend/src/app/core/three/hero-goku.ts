@@ -1,4 +1,4 @@
-﻿import * as THREE from 'three';
+import * as THREE from 'three';
 import { dotSprite } from './materials';
 
 export class HeroGoku {
@@ -30,7 +30,7 @@ export class HeroGoku {
 
 
     const h = 8.6;
-    const w = h * (410.0 / 795.0);
+    const w = h * (648.0 / 1024.0);
 
     const geo = new THREE.PlaneGeometry(w, h);
     const mat = new THREE.MeshBasicMaterial({
@@ -57,7 +57,7 @@ export class HeroGoku {
 
 
     const bandGeo = new THREE.CylinderGeometry(0.22, 0.22, 0.35, 16);
-    const bandMat = new THREE.MeshBasicMaterial({ color: 0x1E3A8A });
+    const bandMat = new THREE.MeshBasicMaterial({ color: 0x6B1515 });
     const wristband = new THREE.Mesh(bandGeo, bandMat);
     wristband.position.set(0, 1.1, 0);
 

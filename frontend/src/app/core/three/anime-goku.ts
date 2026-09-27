@@ -1,117 +1,181 @@
-﻿import * as THREE from 'three';
+import * as THREE from 'three';
 import { dotSprite } from './materials';
 
 export class AnimeGoku {
   readonly group = new THREE.Group();
 
   private bodyMesh!: THREE.Mesh;
-  private punchArmLeft!: THREE.Group;
-  private punchArmRight!: THREE.Group;
+  private backMesh!: THREE.Mesh;
+  private contactShadow!: THREE.Mesh;
   private kiParticles!: THREE.Points;
   private kiPositions!: Float32Array;
   private kiVelocities!: Float32Array;
-  private punchFlashes!: THREE.Points;
-  private flashPositions!: Float32Array;
   private impactRing!: THREE.Mesh;
 
-  private punchPhase = 0;
-  private comboBurst = 0;
-  private leftPunchProgress = 0;
-  private rightPunchProgress = 0;
+  private chestLight!: THREE.PointLight;
+  private hairLight!: THREE.PointLight;
+  private rimLight!: THREE.PointLight;
+
+  private pulsePhase = 0;
+  private flurryTimer = 0;
+  private heroHeight = 3.4;
+  private heroWidth = 3.4 * (648.0 / 1024.0);
 
   constructor(private lowPower: boolean) {
-    this.buildGokuBody();
-    this.buildBoxingFists();
-    this.buildKiAura();
-    this.buildPunchEffects();
-
-
+    this.buildVolumetricBody();
+    this.buildContactShadow();
+    this.buildGodKiAura();
+    this.buildImpactEffects();
+    this.buildDynamicLights();
 
     this.group.position.set(2.8, -1.95, 0);
   }
 
-  private buildGokuBody(): void {
+  private buildVolumetricBody(): void {
     const texLoader = new THREE.TextureLoader();
     const gokuTex = texLoader.load('/images/goku-anime.png');
     gokuTex.colorSpace = THREE.SRGBColorSpace;
-    gokuTex.anisotropy = 4;
+    gokuTex.anisotropy = 8;
+    gokuTex.generateMipmaps = true;
 
+    const normalTex = texLoader.load('/images/goku-normal.png');
+    normalTex.anisotropy = 8;
 
-    const height = 3.35;
-    const width = height * (410.0 / 795.0);
+    const width = this.heroWidth;
+    const height = this.heroHeight;
+    const segX = 54;
+    const segY = 54;
 
-    const geo = new THREE.PlaneGeometry(width, height);
+    const geo = new THREE.PlaneGeometry(width, height, segX, segY);
+    const pos = geo.attributes['position'] as THREE.BufferAttribute;
+
+    for (let i = 0; i < pos.count; i++) {
+      const vx = pos.getX(i);
+      const vy = pos.getY(i);
+      const nx = vx / (width * 0.5);   // [-1, 1] horizontally
+      const ny = vy / (height * 0.5);  // [-1, 1] vertically
+
+      // 1. Horizontal cylindrical curvature (chest curves forward, arms back)
+      const torsoCurve = Math.cos(nx * Math.PI * 0.46) * 0.22;
+
+      // 2. Chest & Pectoral bulge
+      const pecDist = Math.hypot(nx, ny - 0.20);
+      const pecBulge = Math.max(0, 1.0 - pecDist / 0.65) * 0.14;
+
+      // 3. Clenched fists forward bulge (arms on both sides at waist level)
+      const fistDist = Math.hypot(Math.abs(nx) - 0.68, ny - 0.04);
+      const fistBulge = Math.max(0, 1.0 - fistDist / 0.32) * 0.16;
+
+      // 4. Hair spike depth curvature
+      let hairDepth = 0;
+      if (ny > 0.4) {
+        hairDepth = Math.cos(nx * Math.PI * 0.5) * 0.12 + Math.sin(nx * Math.PI * 2.8) * 0.05;
+      }
+
+      // 5. Leg curvature
+      let legCurve = 0;
+      if (ny < -0.25) {
+        const legDist = Math.min(Math.abs(nx - 0.32), Math.abs(nx + 0.32));
+        legCurve = Math.max(0, 1.0 - legDist / 0.32) * 0.12;
+      }
+
+      pos.setZ(i, torsoCurve + pecBulge + fistBulge + hairDepth + legCurve);
+    }
+    geo.computeVertexNormals();
+
     const mat = new THREE.MeshStandardMaterial({
       map: gokuTex,
+      normalMap: normalTex,
+      normalScale: new THREE.Vector2(0.9, 0.9),
       transparent: true,
-      alphaTest: 0.06,
-      side: THREE.DoubleSide,
-      roughness: 0.45,
-      metalness: 0.15,
-      emissive: new THREE.Color('#381810'),
-      emissiveIntensity: 0.22
+      alphaTest: 0.08,
+      roughness: 0.35,
+      metalness: 0.22,
+      emissive: new THREE.Color('#450a0a'),
+      emissiveIntensity: 0.20,
+      side: THREE.FrontSide,
+      depthWrite: true
     });
 
     this.bodyMesh = new THREE.Mesh(geo, mat);
-
-    this.bodyMesh.position.set(0, height / 2, 0);
+    this.bodyMesh.position.set(0, height * 0.5, 0.06);
     this.bodyMesh.castShadow = true;
-    this.group.add(this.bodyMesh);
+
+    // Solid dark backmesh for physical 3D depth and thickness
+    const backGeo = geo.clone();
+    const backMat = new THREE.MeshBasicMaterial({
+      color: 0x120303,
+      side: THREE.BackSide,
+      depthWrite: false
+    });
+    this.backMesh = new THREE.Mesh(backGeo, backMat);
+    this.backMesh.position.set(0, height * 0.5, 0.01);
+
+    this.group.add(this.backMesh, this.bodyMesh);
   }
 
-  private buildBoxingFists(): void {
+  private buildContactShadow(): void {
+    const texLoader = new THREE.TextureLoader();
+    const shadowTex = texLoader.load('/images/hero-shadow.png');
 
-    this.punchArmLeft = new THREE.Group();
-    this.punchArmLeft.position.set(-0.35, 1.85, 0.25);
+    const shadowGeo = new THREE.PlaneGeometry(1.8, 1.1);
+    const shadowMat = new THREE.MeshBasicMaterial({
+      map: shadowTex,
+      transparent: true,
+      opacity: 0.82,
+      depthWrite: false
+    });
 
-    const wristGeo = new THREE.CylinderGeometry(0.12, 0.13, 0.28, 12);
-    wristGeo.rotateX(Math.PI / 2);
-    const wristMat = new THREE.MeshBasicMaterial({ color: 0x1E3A8A });
-    const leftWrist = new THREE.Mesh(wristGeo, wristMat);
-
-    const fistGeo = new THREE.BoxGeometry(0.24, 0.26, 0.28);
-    const fistMat = new THREE.MeshBasicMaterial({ color: 0xFED7AA });
-    const leftFist = new THREE.Mesh(fistGeo, fistMat);
-    leftFist.position.set(0, 0, 0.22);
-
-    this.punchArmLeft.add(leftWrist, leftFist);
-    this.punchArmLeft.scale.setScalar(0.001);
-
-
-    this.punchArmRight = new THREE.Group();
-    this.punchArmRight.position.set(0.38, 1.78, 0.22);
-
-    const rightWrist = new THREE.Mesh(wristGeo, wristMat);
-    const rightFist = new THREE.Mesh(fistGeo, fistMat);
-    rightFist.position.set(0, 0, 0.24);
-
-    this.punchArmRight.add(rightWrist, rightFist);
-    this.punchArmRight.scale.setScalar(0.001);
-
-    this.group.add(this.punchArmLeft, this.punchArmRight);
+    this.contactShadow = new THREE.Mesh(shadowGeo, shadowMat);
+    this.contactShadow.rotation.x = -Math.PI / 2;
+    this.contactShadow.position.set(0, 0.015, 0.06);
+    this.group.add(this.contactShadow);
   }
 
-  private buildKiAura(): void {
-    const count = this.lowPower ? 45 : 110;
+  private buildDynamicLights(): void {
+    // God Ki Chest/Torso Key Light
+    this.chestLight = new THREE.PointLight(0xFF4500, 3.8, 4.2, 1.4);
+    this.chestLight.position.set(0, 1.8, 1.2);
+
+    // Hair Glow Halo Light
+    this.hairLight = new THREE.PointLight(0xFF2200, 4.0, 3.8, 1.4);
+    this.hairLight.position.set(0, 3.4, 0.8);
+
+    // Golden Silhouette Rim Light
+    this.rimLight = new THREE.PointLight(0xF59E0B, 3.0, 4.5, 1.5);
+    this.rimLight.position.set(-1.6, 2.0, 0.3);
+
+    this.group.add(this.chestLight, this.hairLight, this.rimLight);
+  }
+
+  private buildGodKiAura(): void {
+    const count = this.lowPower ? 50 : 130;
     this.kiPositions = new Float32Array(count * 3);
-    this.kiVelocities = new Float32Array(count);
+    this.kiVelocities = new Float32Array(count * 3);
 
     const colors = new Float32Array(count * 3);
-    const goldCol = new THREE.Color(0xF5C86A);
-    const cyanCol = new THREE.Color(0x38BDF8);
+    const crimsonCol = new THREE.Color(0xFF2200);
+    const flameCol = new THREE.Color(0xFF7A00);
+    const goldCol = new THREE.Color(0xFBBF24);
 
     for (let i = 0; i < count; i++) {
+      const idx = i * 3;
       const angle = Math.random() * Math.PI * 2;
-      const radius = 0.3 + Math.random() * 0.9;
-      this.kiPositions[i * 3] = Math.cos(angle) * radius;
-      this.kiPositions[i * 3 + 1] = Math.random() * 3.4;
-      this.kiPositions[i * 3 + 2] = Math.sin(angle) * radius * 0.5;
-      this.kiVelocities[i] = 1.2 + Math.random() * 2.2;
+      const radius = 0.25 + Math.random() * 0.95;
 
-      const c = Math.random() < 0.65 ? goldCol : cyanCol;
-      colors[i * 3] = c.r;
-      colors[i * 3 + 1] = c.g;
-      colors[i * 3 + 2] = c.b;
+      this.kiPositions[idx] = Math.cos(angle) * radius;
+      this.kiPositions[idx + 1] = Math.random() * 3.4;
+      this.kiPositions[idx + 2] = Math.sin(angle) * radius * 0.6;
+
+      this.kiVelocities[idx] = (Math.random() - 0.5) * 0.014;
+      this.kiVelocities[idx + 1] = 0.018 + Math.random() * 0.028;
+      this.kiVelocities[idx + 2] = (Math.random() - 0.5) * 0.014;
+
+      const rnd = Math.random();
+      const c = rnd < 0.52 ? crimsonCol : rnd < 0.82 ? flameCol : goldCol;
+      colors[idx] = c.r;
+      colors[idx + 1] = c.g;
+      colors[idx + 2] = c.b;
     }
 
     const geo = new THREE.BufferGeometry();
@@ -119,11 +183,11 @@ export class AnimeGoku {
     geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
     const mat = new THREE.PointsMaterial({
-      size: 0.18,
+      size: 0.17,
       map: dotSprite(),
       vertexColors: true,
       transparent: true,
-      opacity: 0.85,
+      opacity: 0.92,
       blending: THREE.AdditiveBlending,
       depthWrite: false
     });
@@ -132,11 +196,10 @@ export class AnimeGoku {
     this.group.add(this.kiParticles);
   }
 
-  private buildPunchEffects(): void {
-
-    const ringGeo = new THREE.RingGeometry(0.1, 0.45, 24);
+  private buildImpactEffects(): void {
+    const ringGeo = new THREE.RingGeometry(0.15, 0.75, 32);
     const ringMat = new THREE.MeshBasicMaterial({
-      color: 0xFCD34D,
+      color: 0xFF4500,
       transparent: true,
       opacity: 0,
       side: THREE.DoubleSide,
@@ -144,40 +207,13 @@ export class AnimeGoku {
       depthWrite: false
     });
     this.impactRing = new THREE.Mesh(ringGeo, ringMat);
-    this.impactRing.position.set(0, 1.8, 0.6);
+    this.impactRing.position.set(0, 1.8, 0.4);
     this.group.add(this.impactRing);
-
-
-    const flashCount = 18;
-    this.flashPositions = new Float32Array(flashCount * 3);
-    for (let i = 0; i < flashCount; i++) {
-      this.flashPositions[i * 3] = (Math.random() - 0.5) * 0.4;
-      this.flashPositions[i * 3 + 1] = 1.8 + (Math.random() - 0.5) * 0.4;
-      this.flashPositions[i * 3 + 2] = 0.5 + Math.random() * 0.3;
-    }
-
-    const flashGeo = new THREE.BufferGeometry();
-    flashGeo.setAttribute('position', new THREE.BufferAttribute(this.flashPositions, 3));
-
-    const flashMat = new THREE.PointsMaterial({
-      size: 0.35,
-      color: 0xFFE066,
-      map: dotSprite(),
-      transparent: true,
-      opacity: 0,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false
-    });
-
-    this.punchFlashes = new THREE.Points(flashGeo, flashMat);
-    this.group.add(this.punchFlashes);
   }
-
 
   triggerFlurry(): void {
-    this.comboBurst = 1.5;
+    this.flurryTimer = 1.4;
   }
-
 
   update(time: number, dt: number, mouse: THREE.Vector2, localScene: number, active: boolean): void {
     if (!active) {
@@ -186,141 +222,79 @@ export class AnimeGoku {
     }
     this.group.visible = true;
 
+    this.pulsePhase += dt * 3.2;
 
-    const enter = Math.min(1, Math.max(0, (localScene - 0.12) / 0.25));
     const exit = Math.min(1, Math.max(0, (localScene - 0.78) / 0.2));
-
-
-    const baseX = 2.8 + mouse.x * 0.25;
-    const baseY = -1.95;
-    this.group.position.set(baseX, baseY, 0);
-
-
     const bodyMat = this.bodyMesh.material as THREE.MeshStandardMaterial;
     bodyMat.opacity = 1 - exit;
 
+    // 1. Natural 3D breathing and stance balance
+    const breath = Math.sin(this.pulsePhase * 0.85) * 0.022;
+    this.bodyMesh.position.y = this.heroHeight * 0.5 + breath;
+    this.backMesh.position.y = this.heroHeight * 0.5 + breath;
 
+    // Contact shadow subtly expands with breath
+    this.contactShadow.scale.setScalar(1.0 + breath * 0.6);
 
+    // 2. 3D Mouse Parallax Tilt (like Captain America hero stage)
+    const targetYaw = -0.25 + mouse.x * 0.36;
+    const targetPitch = -mouse.y * 0.12;
+    this.group.rotation.y += (targetYaw - this.group.rotation.y) * 0.08;
+    this.group.rotation.x += (targetPitch - this.group.rotation.x) * 0.08;
 
-    this.punchPhase += dt * (3.8 + this.comboBurst * 4.5);
-    if (this.comboBurst > 0) this.comboBurst = Math.max(0, this.comboBurst - dt);
+    // 3. Dynamic Key Light Tracking and Pulsing
+    this.chestLight.position.x = mouse.x * 0.35;
+    this.chestLight.position.y = 1.8 + mouse.y * 0.25;
 
+    let flurryBoost = 0;
+    if (this.flurryTimer > 0) {
+      this.flurryTimer -= dt;
+      flurryBoost = Math.max(0, this.flurryTimer) * 2.5;
 
-    const bounce = Math.sin(time * 5.8) * 0.055;
-    const sway = Math.cos(time * 2.9) * 0.045;
-    const torsoTilt = Math.sin(time * 2.9) * 0.035;
-
-    this.bodyMesh.position.y = 3.35 / 2 + bounce;
-    this.bodyMesh.position.x = sway;
-    this.bodyMesh.rotation.z = torsoTilt;
-
-
-    const targetYaw = -0.38 + Math.sin(time * 2.9) * 0.08 + mouse.x * 0.35;
-    this.group.rotation.y = targetYaw;
-
-
-    const cycle = (this.punchPhase % 4.0);
-
-    if (cycle < 1.4) {
-
-      const p = Math.sin((cycle / 1.4) * Math.PI);
-      this.leftPunchProgress = Math.pow(p, 0.65);
-      this.rightPunchProgress = 0;
-
-
-      this.bodyMesh.position.z = -this.leftPunchProgress * 0.08;
-      this.bodyMesh.rotation.y = this.leftPunchProgress * 0.14;
-
-
-      this.punchArmLeft.scale.setScalar(0.95);
-      this.punchArmLeft.position.set(-0.32 + sway, 1.85 + bounce, 0.25 + this.leftPunchProgress * 0.65);
-      this.punchArmRight.scale.setScalar(0.001);
-
-
-      if (this.leftPunchProgress > 0.88) {
-        this.impactRing.position.set(-0.32 + sway, 1.85 + bounce, 0.95);
-        this.impactRing.scale.setScalar(0.4 + (this.leftPunchProgress - 0.88) * 4.0);
-        (this.impactRing.material as THREE.MeshBasicMaterial).opacity = (1.0 - this.leftPunchProgress) * 5.0;
-        (this.punchFlashes.material as THREE.PointsMaterial).opacity = 0.9;
-      } else {
-        (this.impactRing.material as THREE.MeshBasicMaterial).opacity = 0;
-        (this.punchFlashes.material as THREE.PointsMaterial).opacity = 0;
-      }
-    } else if (cycle < 2.0) {
-
-      this.leftPunchProgress = 0;
-      this.rightPunchProgress = 0;
-      this.punchArmLeft.scale.setScalar(0.001);
-      this.punchArmRight.scale.setScalar(0.001);
-      (this.impactRing.material as THREE.MeshBasicMaterial).opacity = 0;
-      (this.punchFlashes.material as THREE.PointsMaterial).opacity = 0;
-      this.bodyMesh.position.z = 0;
-      this.bodyMesh.rotation.y = 0;
-    } else if (cycle < 3.4) {
-
-      const p = Math.sin(((cycle - 2.0) / 1.4) * Math.PI);
-      this.rightPunchProgress = Math.pow(p, 0.65);
-      this.leftPunchProgress = 0;
-
-
-      this.bodyMesh.position.z = -this.rightPunchProgress * 0.1;
-      this.bodyMesh.rotation.y = -this.rightPunchProgress * 0.18;
-
-
-      this.punchArmRight.scale.setScalar(0.95);
-      this.punchArmRight.position.set(0.35 + sway, 1.78 + bounce, 0.22 + this.rightPunchProgress * 0.72);
-      this.punchArmLeft.scale.setScalar(0.001);
-
-
-      if (this.rightPunchProgress > 0.88) {
-        this.impactRing.position.set(0.35 + sway, 1.78 + bounce, 1.0);
-        this.impactRing.scale.setScalar(0.45 + (this.rightPunchProgress - 0.88) * 4.2);
-        (this.impactRing.material as THREE.MeshBasicMaterial).opacity = (1.0 - this.rightPunchProgress) * 5.0;
-        (this.punchFlashes.material as THREE.PointsMaterial).opacity = 0.95;
-      } else {
-        (this.impactRing.material as THREE.MeshBasicMaterial).opacity = 0;
-        (this.punchFlashes.material as THREE.PointsMaterial).opacity = 0;
-      }
+      const progress = 1.0 - (this.flurryTimer / 1.4);
+      this.impactRing.scale.setScalar(0.5 + progress * 3.2);
+      (this.impactRing.material as THREE.MeshBasicMaterial).opacity = (1.0 - progress) * 0.95;
     } else {
-
-      this.leftPunchProgress = 0;
-      this.rightPunchProgress = 0;
-      this.punchArmLeft.scale.setScalar(0.001);
-      this.punchArmRight.scale.setScalar(0.001);
       (this.impactRing.material as THREE.MeshBasicMaterial).opacity = 0;
-      (this.punchFlashes.material as THREE.PointsMaterial).opacity = 0;
     }
 
+    this.chestLight.intensity = 3.6 + Math.sin(this.pulsePhase * 2.0) * 0.5 + flurryBoost;
+    this.hairLight.intensity = 3.8 + Math.sin(this.pulsePhase * 2.4 + 1) * 0.4 + flurryBoost;
 
+    // 4. God Ki Swirling Flame Particles Update
+    if (this.kiParticles && this.kiPositions) {
+      const count = this.kiPositions.length / 3;
+      for (let i = 0; i < count; i++) {
+        const idx = i * 3;
+        this.kiPositions[idx] += this.kiVelocities[idx];
+        this.kiPositions[idx + 1] += this.kiVelocities[idx + 1] * (1.0 + flurryBoost * 0.8);
+        this.kiPositions[idx + 2] += this.kiVelocities[idx + 2];
 
+        // Orbit around body
+        const x = this.kiPositions[idx];
+        const z = this.kiPositions[idx + 2];
+        const rotSpeed = 0.025;
+        this.kiPositions[idx] = x * Math.cos(rotSpeed) - z * Math.sin(rotSpeed);
+        this.kiPositions[idx + 2] = x * Math.sin(rotSpeed) + z * Math.cos(rotSpeed);
 
-    const arr = this.kiParticles.geometry.attributes['position'] as THREE.BufferAttribute;
-    const count = arr.count;
-    for (let i = 0; i < count; i++) {
-      let py = this.kiPositions[i * 3 + 1] + this.kiVelocities[i] * dt * 1.5;
-      if (py > 3.6) {
-        py = 0.05 + Math.random() * 0.4;
-        const angle = Math.random() * Math.PI * 2;
-        const radius = 0.25 + Math.random() * 0.8;
-        this.kiPositions[i * 3] = Math.cos(angle) * radius;
-        this.kiPositions[i * 3 + 2] = Math.sin(angle) * radius * 0.5;
+        if (this.kiPositions[idx + 1] > 3.6) {
+          const angle = Math.random() * Math.PI * 2;
+          const radius = 0.25 + Math.random() * 0.95;
+          this.kiPositions[idx] = Math.cos(angle) * radius;
+          this.kiPositions[idx + 1] = 0.05;
+          this.kiPositions[idx + 2] = Math.sin(angle) * radius * 0.6;
+        }
       }
-      this.kiPositions[i * 3 + 1] = py;
-
-
-      this.kiPositions[i * 3] += Math.sin(time * 4.0 + i) * 0.006;
+      this.kiParticles.geometry.attributes['position'].needsUpdate = true;
     }
-    arr.needsUpdate = true;
   }
 
   dispose(): void {
-    this.bodyMesh.geometry.dispose();
     (this.bodyMesh.material as THREE.Material).dispose();
-    this.kiParticles.geometry.dispose();
-    (this.kiParticles.material as THREE.Material).dispose();
-    this.impactRing.geometry.dispose();
-    (this.impactRing.material as THREE.Material).dispose();
-    this.punchFlashes.geometry.dispose();
-    (this.punchFlashes.material as THREE.Material).dispose();
+    this.bodyMesh.geometry.dispose();
+    (this.backMesh.material as THREE.Material).dispose();
+    this.backMesh.geometry.dispose();
+    this.kiParticles?.geometry.dispose();
+    (this.kiParticles?.material as THREE.Material)?.dispose();
   }
 }
