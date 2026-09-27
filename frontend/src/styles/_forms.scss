@@ -38,6 +38,14 @@
     box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.2);
   }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  &::-ms-reveal,
+  &::-ms-clear {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    pointer-events: none !important;
+  }
 }
 .textarea-fh { min-height: 110px; resize: vertical; line-height: 1.55; }
 .select-fh {

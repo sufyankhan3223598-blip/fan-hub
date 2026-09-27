@@ -1,0 +1,141 @@
+{\rtf1\ansi\ansicpg1252\deff0\deflang1033{\fonttbl{\f0\fnil\fcharset0 Calibri;}{\f1\fnil\fcharset0 Consolas;}{\f2\fnil\fcharset0 Calibri Light;}}
+{\colortbl ;\red14\green116\blue144;\red30\green41\blue59;\red225\green29\blue72;\red100\green116\blue139;\red241\green245\blue249;\red255\green255\blue255;\red15\green23\blue42;}
+\viewkind4\uc1\pard\sa200\sl276\slmult1\qj\f0\fs22
+
+{\pard\qc\b\fs36\cf1 FAN HUB PLUS &mdash; MULTIVERSE FANDOM PORTAL\par}
+{\pard\qc\b\fs26\cf3 TechWiz 7 World Tech Championship &mdash; Final Project Deliverable\par}
+{\pard\qc\i\fs20\cf4 Submission Deliverable: ReadMe.doc with Project Assumptions\par}
+{\pard\qc\fs18\cf4 Organization: Aptech Limited | Category: End-to-End Web Solutions\par}
+\par\pard\sl276\slmult1
+\line
+{\pard\b\fs24\cf2 TABLE OF CONTENTS\par}
+1. Executive Overview\par
+2. Project Assumptions (Mandatory Deliverable)\par
+3. System Constraints & Boundaries\par
+4. Verified Project Deliverables Inventory (SQL Scripts, Code, Assets)\par
+5. Hardware, Software & Network Prerequisites\par
+6. Quick Start & Installation Instructions (Automated & Manual)\par
+7. Demonstration User Credentials for All Roles\par
+8. Key Architecture & Feature Verification Checklist\par
+\line
+
+\pard\sa200\sl276\slmult1
+{\pard\b\fs26\cf1 1. EXECUTIVE OVERVIEW\par}
+\b Fan Hub Plus\b0  is a production-grade, full-stack digital web portal and multimedia ecosystem engineered specifically for global fandom communities. Built for the TechWiz 7 World Tech Championship, the application unifies eight major fandom realms: Anime, Gaming, Movies, TV Shows, K-Pop, Comics, Manga, and Cosplay into a singular responsive platform powered by ASP.NET Core 8 Web API, Angular 19 Standalone Signals, Three.js 3D WebGL, and Microsoft SQL Server.
+\par
+
+{\pard\b\fs26\cf1 2. PROJECT ASSUMPTIONS (MANDATORY DELIVERABLE)\par}
+The architecture, operational lifecycle, database relationships, and evaluation workflows of \b Fan Hub Plus\b0  are constructed under the following explicit assumptions:
+\par
+\bullet\tab\b 1. Client Computing & Modern Browser Environment:\b0\par
+\tab Evaluators, administrators, and visitors will access the portal via modern evergreen web browsers (Google Chrome 110+, Microsoft Edge 110+, Mozilla Firefox 115+, or Apple Safari 16+) with ECMAScript 2022 and HTML5 standards enabled.\par
+\tab Hardware-accelerated WebGL 2.0 is supported by the client GPU/graphics driver to facilitate real-time 3D volumetric rendering of interactive character models (Three.js Super Saiyan God Goku and Captain America stages) and particle vortexes.\par
+\tab The client screen resolution ranges from responsive mobile viewports (minimum 375px width) to full desktop monitors (1920x1080) and 4K ultra-wide displays.\par
+\par
+\bullet\tab\b 2. Localhost & Network Loopback Connectivity:\b0\par
+\tab The application executes reliably in a local evaluation environment where the Angular client (hosted at http://localhost:4200) communicates with the backend RESTful API (hosted at http://localhost:5080) over local loopback TCP/IP.\par
+\tab Standard HTTP/1.1 or HTTP/2 transport and JSON serialization are utilized without requiring high-latency external proxy routing.\par
+\par
+\bullet\tab\b 3. Database Server Availability & ACID Conformance:\b0\par
+\tab Microsoft SQL Server (2019, 2022, or SQL Server Express / LocalDB) is provisioned on the host workstation with SQL Server Authentication or Windows Integrated Authentication enabled.\par
+\tab The database engine natively enforces ACID transaction guarantees, primary and foreign key referential integrity, unique index constraints, and cascading delete rules.\par
+\par
+\bullet\tab\b 4. Non-Transactional Merchandise & Resource Discovery Scope:\b0\par
+\tab In strict compliance with TechWiz 7 competition rules, the Merchandise & Collectibles module is purely an interactive discovery, cataloging, and wishlist tracking gallery. \b No financial transactions, payment gateway integrations (e.g. Stripe, PayPal), credit card processing, or physical order dispatch mechanisms are implemented.\b0\par
+\par
+\bullet\tab\b 5. Self-Contained Static Media Hosting:\b0\par
+\tab All high-resolution fandom assets (character art, realm banners, audio clips, video trailers, cosplay blueprints) are hosted and served locally by the ASP.NET Core static files middleware (wwwroot directory). No paid third-party external CDN subscriptions or active internet connections are required to render media.\par
+\par
+\bullet\tab\b 6. Pre-Seeded Roles & Test Data:\b0\par
+\tab The database is pre-seeded with representative fandom records across all 8 realms (183 contents, 181 media items, 100+ merchandise records, character profiles, upcoming releases, and events) and verified user credentials for all evaluation roles (Administrator, Registered Fan, Creator).\par
+\par
+
+{\pard\b\fs26\cf1 3. SYSTEM CONSTRAINTS & BOUNDARIES\par}
+1. \b Zero Source Code in Documentation:\b0  In strict accordance with competition rules, project documentation contains no raw source code snippets; actual code resides exclusively in the source repository directories.\par
+2. \b Stateless Authentication:\b0  JWT access tokens expire after 30 minutes, supported by database-backed sliding refresh tokens valid for 7 days.\par
+3. \b Responsive Breakpoints:\b0  UI adapts dynamically across Mobile (< 640px), Tablet (640px - 1024px), Desktop (1024px - 1440px), and Ultra-wide (> 1440px).\par
+\par
+
+{\pard\b\fs26\cf1 4. VERIFIED PROJECT DELIVERABLES INVENTORY\par}
+The project submission contains all required deliverables organized cleanly:
+\par
+\bullet\tab\b SQL Script Files (.sql):\b0\par
+\tab - \f1 Project/database/schema.sql\f0  &mdash; Full DDL script creating all tables, foreign keys, and indices.\par
+\tab - \f1 Project/database/seed.sql\f0  &mdash; Complete initial dataset populating realms, users, content, and FAQs.\par
+\tab - \f1 Project/database/update_card_images.sql\f0  &mdash; Script syncing distinct card images across all grids.\par
+\tab - (Synchronized duplicates also provided in \f1 Project/FanHubPlus-code/FanHubPlus/database/\f0 )\par
+\par
+\bullet\tab\b Source Code Repositories:\b0\par
+\tab - \f1 Project/FanHubPlus-code/FanHubPlus/backend/\f0  &mdash; ASP.NET Core 8 Web API project.\par
+\tab - \f1 Project/FanHubPlus-code/FanHubPlus/frontend/\f0  &mdash; Angular 19 Standalone Signals application.\par
+\par
+\bullet\tab\b Documentation & Manuals:\b0\par
+\tab - \f1 Project/FAN_HUB_PLUS_PROJECT_DOCUMENTATION.md\f0  &mdash; Comprehensive SRS & technical blueprint.\par
+\tab - \f1 Project/ReadMe.doc\f0  &mdash; Submission document with Assumptions and evaluation guide.\par
+\par
+\bullet\tab\b High-Resolution Media Archives:\b0\par
+\tab - \f1 Project/FanHubPlus-media-images/\f0  &mdash; Realm visuals, character portraits, merchandise photos.\par
+\tab - \f1 Project/FanHubPlus-media-audio-video/\f0  &mdash; Anime video trailers, soundtracks, podcast MP3s.\par
+\par
+\bullet\tab\b One-Click Execution Launcher:\b0\par
+\tab - \f1 Project/run_project.bat\f0  &mdash; Automated dual-service startup script.\par
+\par
+
+{\pard\b\fs26\cf1 5. HARDWARE, SOFTWARE & NETWORK PREREQUISITES\par}
+- \b Operating System:\b0  Microsoft Windows 10 / 11, macOS, or Linux\par
+- \b .NET SDK:\b0  .NET 8.0 SDK or higher installed (\f1 dotnet --version\f0 )\par
+- \b Node.js Runtime:\b0  Node.js v18.0+, v20.0+, or v24.0+ with npm (\f1 node -v\f0 )\par
+- \b Database Server:\b0  Microsoft SQL Server 2019 / 2022 or SQL Server Express\par
+- \b Web Browser:\b0  Google Chrome 110+, Microsoft Edge 110+, Mozilla Firefox 115+\par
+\par
+
+{\pard\b\fs26\cf1 6. QUICK START & INSTALLATION INSTRUCTIONS\par}
+{\pard\b\fs22\cf3 Option A: Automated One-Click Launch (Recommended)\par}
+1. Double-click \f1 Project\run_project.bat\f0  from Windows Explorer or run from Command Prompt.\par
+2. The script will automatically verify dependencies, build and launch the Backend Web API on \f1 http://localhost:5080\f0 , and launch the Angular Frontend on \f1 http://localhost:4200\f0 .\par
+3. The browser will open to \f1 http://localhost:4200\f0 .\par
+\par
+{\pard\b\fs22\cf3 Option B: Manual CLI Execution\par}
+1. \b Launch Backend Web API:\b0\par
+\tab Open terminal in \f1 Project\FanHubPlus-code\FanHubPlus\backend\FanHubPlus.Api\f0\par
+\tab Run: \f1 dotnet run\f0\par
+\tab Verify: Navigate to \f1 http://localhost:5080/swagger\f0  to inspect API documentation.\par
+2. \b Launch Frontend Client:\b0\par
+\tab Open terminal in \f1 Project\FanHubPlus-code\FanHubPlus\frontend\f0\par
+\tab Run: \f1 npm start\f0\par
+\tab Verify: Navigate to \f1 http://localhost:4200\f0 .\par
+\par
+
+{\pard\b\fs26\cf1 7. DEMONSTRATION USER CREDENTIALS FOR ALL ROLES\par}
+The system includes pre-configured accounts for evaluating different permission tiers:
+\par
+\line
+{\b ADMINISTRATOR ACCOUNT (Full System & Moderation Privileges):\b0}\par
+Email: \f1 admin@fanhubplus.com\f0\par
+Password: \f1 Admin@123\f0\par
+Capabilities: Admin Control Suite, FAQ Knowledge Base Management, Live Query Audit Logs, Content CRUD, User Moderation, Event Management, Fan Submission Approvals.\par
+\line
+{\b REGISTERED FAN ACCOUNTS (Full Member Privileges):\b0}\par
+- Fan 1: \f1 ayesha@fanhubplus.com\f0  | Password: \f1 User@123\f0\par
+- Fan 2: \f1 bilal@fanhubplus.com\f0   | Password: \f1 User@123\f0\par
+- Fan 3: \f1 sara@fanhubplus.com\f0    | Password: \f1 User@123\f0\par
+- Fan 4: \f1 omar@fanhubplus.com\f0    | Password: \f1 User@123\f0\par
+Capabilities: Personalized Dashboard, Bookmarking with Custom Private Notes, 5-Star Ratings & Reviews, Fan Build/Cosplay Submissions, Avatar Personalization.\par
+\line
+{\b VISITOR / GUEST (Unauthenticated Access):\b0}\par
+No login required. Guests can explore all 8 Multiverse Realms, search and filter the catalog, view character rosters, watch video trailers, stream podcasts, use the interactive GIS Event Map, and chat with the AI Onboarding Assistant.\par
+\par
+
+{\pard\b\fs26\cf1 8. KEY ARCHITECTURE & FEATURE VERIFICATION CHECKLIST\par}
+- [x] \b 8 Multiverse Realms:\b0  Custom color branding, themed spotlight feeds, and multimedia integration for Anime, Gaming, Movies, TV Shows, K-Pop, Comics, Manga, Cosplay.\par
+- [x] \b 3D WebGL Stages:\b0  Real-time Three.js scenes featuring Super Saiyan God Goku (normal mapped, God Ki particle vortex) and Captain America.\par
+- [x] \b Fandom Content Explorer:\b0  Instant multi-facet filtering (category, genre, year, rating, format) and sorting.\par
+- [x] \b AI Chatbot Assistant:\b0  Interactive 4-step onboarding flow guiding new fans through realm selection and bookmarking.\par
+- [x] \b Admin Knowledge Base Studio:\b0  Live FAQ CRUD desk and real-time query audit desk with intent detection.\par
+- [x] \b Upcoming Releases Countdown:\b0  Live countdown clocks, studio highlights, and 3D card tilt effects.\par
+- [x] \b Interactive GIS Event Map:\b0  Leaflet map with custom fandom markers, GPS distance calculation, and event calendar.\par
+- [x] \b Personal Fan Dashboard:\b0  Custom bookmarks with private notes, favorite realm badges, and fan submission tracking.\par
+- [x] \b Zero Duplicate Card Images:\b0  Every card across the entire website features a unique, high-definition visual asset.\par
+\line
+{\pard\qc\i\cf4 &mdash; Fan Hub Plus &mdash; Engineered for TechWiz 7 World Tech Championship &mdash;\par}
+}

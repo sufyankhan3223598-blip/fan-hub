@@ -1,4 +1,4 @@
-﻿import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from '../shared/components/icon.component';
 import { LogoComponent } from '../shared/components/basics';
@@ -17,7 +17,7 @@ import { ThemeService } from '../core/services/ui.services';
       <div class="container-fh">
         <div class="footer-top">
           <div class="f-brand">
-            <a routerLink="/" class="brand"><app-logo [size]="44" /><span>FAN HUB <b>PLUS</b></span></a>
+            <a routerLink="/" class="brand"><app-logo [size]="48" /><span>FAN HUB <b>PLUS</b></span></a>
             <p>One universe. Every fandom. Anime, Gaming, Movies, TV Shows, K-Pop, Comics, Manga and Cosplay in one immersive hub.</p>
             <div class="f-actions">
               <a routerLink="/" fragment="sitemap" class="btn-fh btn-ghost btn-sm"><app-icon name="sitemap" /> Sitemap</a>

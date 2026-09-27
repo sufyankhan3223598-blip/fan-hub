@@ -4,16 +4,20 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/ui.services';
 import { IconComponent } from '../../shared/components/icon.component';
+import { LogoComponent } from '../../shared/components/basics';
 import { AuthShellComponent } from './auth-shell';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, IconComponent, AuthShellComponent],
+  imports: [ReactiveFormsModule, RouterLink, IconComponent, LogoComponent, AuthShellComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-auth-shell heroType="captain-america" headline="Welcome Back, Avenger" copy="Sign in to continue your journey through the eight multiverse realms.">
       <div class="form-header">
+        <div class="auth-brand-emblem text-center mb-3">
+          <app-logo [size]="64" />
+        </div>
         <span class="royal-eyebrow">
           <app-icon name="shield" /> ROYAL AUTHENTICATION
         </span>
@@ -149,6 +153,12 @@ import { AuthShellComponent } from './auth-shell';
         display: flex;
         align-items: center;
 
+        &:focus-within {
+          .input-icon {
+            color: #F5C86A;
+          }
+        }
+
         .input-icon {
           position: absolute;
           left: 14px;
@@ -158,6 +168,7 @@ import { AuthShellComponent } from './auth-shell';
           transition: color 0.2s ease;
           display: grid;
           place-items: center;
+          z-index: 2;
         }
 
         .royal-input {
@@ -171,6 +182,14 @@ import { AuthShellComponent } from './auth-shell';
           font-size: 0.95rem;
           transition: all 0.22s ease;
 
+          &::-ms-reveal,
+          &::-ms-clear {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            pointer-events: none !important;
+          }
+
           &::placeholder {
             color: rgba(255, 255, 255, 0.3);
           }
@@ -180,10 +199,6 @@ import { AuthShellComponent } from './auth-shell';
             border-color: #F5C86A !important;
             box-shadow: 0 0 16px rgba(245, 200, 106, 0.25) !important;
             outline: none;
-
-            & ~ .input-icon {
-              color: #F5C86A;
-            }
           }
         }
 
@@ -199,6 +214,7 @@ import { AuthShellComponent } from './auth-shell';
           display: grid;
           place-items: center;
           transition: color 0.2s;
+          z-index: 2;
 
           &:hover {
             color: #F5C86A;

@@ -6,6 +6,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { ToastService } from '../../core/services/ui.services';
 import { CategoryStore, REALM_ICONS } from '../../core/services/stores';
 import { IconComponent } from '../../shared/components/icon.component';
+import { LogoComponent } from '../../shared/components/basics';
 import { AuthShellComponent } from './auth-shell';
 
 export function strongPassword(c: AbstractControl): ValidationErrors | null {
@@ -16,7 +17,7 @@ export function strongPassword(c: AbstractControl): ValidationErrors | null {
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, IconComponent, AuthShellComponent],
+  imports: [ReactiveFormsModule, RouterLink, IconComponent, LogoComponent, AuthShellComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-auth-shell heroType="ironman" headline="Claim Your Multiverse Passport" copy="Pick your realms and we'll tune recommendations, live events and your dashboard to your passions.">
@@ -65,6 +66,9 @@ export function strongPassword(c: AbstractControl): ValidationErrors | null {
         </div>
       } @else {
         <div class="form-header">
+          <div class="auth-brand-emblem text-center mb-3">
+            <app-logo [size]="64" />
+          </div>
           <span class="royal-eyebrow">
             <app-icon name="sparkles" /> JOIN THE MULTIVERSE
           </span>
@@ -219,6 +223,12 @@ export function strongPassword(c: AbstractControl): ValidationErrors | null {
         display: flex;
         align-items: center;
 
+        &:focus-within {
+          .input-icon {
+            color: #F5C86A;
+          }
+        }
+
         .input-icon {
           position: absolute;
           left: 14px;
@@ -228,6 +238,7 @@ export function strongPassword(c: AbstractControl): ValidationErrors | null {
           transition: color 0.2s ease;
           display: grid;
           place-items: center;
+          z-index: 2;
         }
 
         .royal-input {
@@ -241,6 +252,14 @@ export function strongPassword(c: AbstractControl): ValidationErrors | null {
           font-size: 0.95rem;
           transition: all 0.22s ease;
 
+          &::-ms-reveal,
+          &::-ms-clear {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            pointer-events: none !important;
+          }
+
           &::placeholder {
             color: rgba(255, 255, 255, 0.3);
           }
@@ -250,10 +269,6 @@ export function strongPassword(c: AbstractControl): ValidationErrors | null {
             border-color: #F5C86A !important;
             box-shadow: 0 0 16px rgba(245, 200, 106, 0.25) !important;
             outline: none;
-
-            & ~ .input-icon {
-              color: #F5C86A;
-            }
           }
         }
 
@@ -269,6 +284,7 @@ export function strongPassword(c: AbstractControl): ValidationErrors | null {
           display: grid;
           place-items: center;
           transition: color 0.2s;
+          z-index: 2;
 
           &:hover {
             color: #F5C86A;

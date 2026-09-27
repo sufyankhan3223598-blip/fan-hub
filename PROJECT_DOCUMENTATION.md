@@ -13,20 +13,23 @@
 - [1.2 Proposed Solution](#12-proposed-solution)
 - [1.3 Purpose of the Document](#13-purpose-of-the-document)
 - [1.4 Scope of the Project](#14-scope-of-the-project)
-- [1.5 System Constraints](#15-system-constraints)
+- [1.5 System Assumptions and Constraints](#15-system-assumptions-and-constraints)
+  - [1.5.1 Project Assumptions](#151-project-assumptions)
+  - [1.5.2 System Constraints](#152-system-constraints)
 - [1.6 Functional Requirements](#16-functional-requirements)
   - [1.6.1 User Authentication and Management](#161-user-authentication-and-management)
   - [1.6.2 Personalized Dashboard](#162-personalized-dashboard)
   - [1.6.3 Fandom Content Explorer (Advanced Filters & Sorting)](#163-fandom-content-explorer-advanced-filters--sorting)
-  - [1.6.4 AI-Powered Chatbot Assistant](#164-ai-powered-chatbot-assistant)
+  - [1.6.4 AI-Powered Chatbot Assistant & Multi-Step Onboarding Flow](#164-ai-powered-chatbot-assistant--multi-step-onboarding-flow)
   - [1.6.5 Interactive Multimedia Center](#165-interactive-multimedia-center)
   - [1.6.6 Character Profiles & Featured Articles Hub](#166-character-profiles--featured-articles-hub)
   - [1.6.7 Merchandise Showcase & Resource Library](#167-merchandise-showcase--resource-library)
-  - [1.6.8 User Feedback and Ratings System](#168-user-feedback-and-ratings-system)
-  - [1.6.9 Bookmarking, Custom Notes, and Sharing](#169-bookmarking-custom-notes-and-sharing)
-  - [1.6.10 Location-Aware Event Discovery & Interactive Calendar](#1610-location-aware-event-discovery--interactive-calendar)
-  - [1.6.11 Administration Control Panel](#1611-administration-control-panel)
-  - [1.6.12 Accessibility & Immersive UI/UX Enhancements](#1612-accessibility--immersive-uiux-enhancements)
+  - [1.6.8 Upcoming Releases & Pre-Launch Countdown Hub](#168-upcoming-releases--pre-launch-countdown-hub)
+  - [1.6.9 User Feedback and Ratings System](#169-user-feedback-and-ratings-system)
+  - [1.6.10 Bookmarking, Custom Notes, and Sharing](#1610-bookmarking-custom-notes-and-sharing)
+  - [1.6.11 Location-Aware Event Discovery & Interactive Calendar](#1611-location-aware-event-discovery--interactive-calendar)
+  - [1.6.12 Administration Control Panel & Knowledge Base Management](#1612-administration-control-panel--knowledge-base-management)
+  - [1.6.13 Accessibility & Immersive UI/UX Enhancements](#1613-accessibility--immersive-uiux-enhancements)
 - [1.7 Non-Functional Requirements](#17-non-functional-requirements)
 - [1.8 Interface Requirements](#18-interface-requirements)
   - [1.8.1 Hardware Interfaces](#181-hardware-interfaces)
@@ -44,6 +47,7 @@
   - [1.9.9 User Credentials for all Roles (MANDATORY)](#199-user-credentials-for-all-roles-mandatory)
   - [1.9.10 Interactive Sitemap & Application Flow](#1910-interactive-sitemap--application-flow)
   - [1.9.11 Ethical AI Usage Statement](#1911-ethical-ai-usage-statement)
+  - [1.9.12 Project Source Code Structure & Implementation File Manifest](#1912-project-source-code-structure--implementation-file-manifest)
 
 ---
 
@@ -124,7 +128,35 @@ The system recognizes three primary tiers of actors:
 
 ---
 
-## 1.5 System Constraints
+## 1.5 System Assumptions and Constraints
+
+### 1.5.1 Project Assumptions
+
+The architecture, system design, data models, and operation of **Fan Hub Plus** are grounded in the following foundational assumptions:
+
+1. **Client Computing & Browser Environment:**
+   - Evaluators, administrators, and users access the platform using modern evergreen web browsers (Google Chrome 110+, Microsoft Edge 110+, Mozilla Firefox 115+, Apple Safari 16+) with JavaScript/ECMAScript 2022 enabled.
+   - Hardware-accelerated WebGL 2.0 is supported by the client GPU/graphics driver to render interactive Three.js 3D character stages and cosmic particle effects.
+   - Client displays range from responsive mobile viewports (minimum 375px width) to standard desktop/laptop displays (1920x1080) and 4K ultra-wide monitors.
+
+2. **Network Infrastructure & Hosting Environment:**
+   - The application functions seamlessly in both local deployment (localhost loopback via `http://localhost:4200` frontend and `http://localhost:5080` API) and distributed cloud environments.
+   - Network connectivity allows standard HTTP/HTTPS RESTful JSON exchanges between the Angular client and ASP.NET Core Web API.
+
+3. **Database Server Availability:**
+   - Microsoft SQL Server (2019, 2022, or SQL Server Express / LocalDB) is installed and active on the host machine.
+   - Standard relational integrity, ACID transaction guarantees, cascade delete rules, and foreign key constraints are natively supported and enforced by the SQL Server engine.
+
+4. **Non-Transactional Merchandise & Fandom Resources Scope:**
+   - In accordance with TechWiz 7 competition guidelines, the Merchandise Showcase is strictly informational, serving as an interactive discovery gallery and fan wishlist collector. **No financial transactions, payment gateway integrations (e.g., Stripe, PayPal), checkout carts, or banking data processing are implemented.**
+
+5. **Static Media Delivery & Asset Management:**
+   - High-definition media assets (character renders, promotional banners, anime video trailers, MP3 podcast episodes, cosplay guides) are stored and served locally by the ASP.NET Core static files middleware (`wwwroot/`) ensuring complete offline/local testability without dependency on paid external CDNs.
+
+6. **Authentication & Demonstration Credential Pre-seeding:**
+   - Pre-configured user roles (Administrator, Registered Fan, Creator) are seeded in the database with known demonstration credentials to allow frictionless evaluation of permission tiers. Passwords are securely hashed using PBKDF2 with SHA-256 and HMAC.
+
+### 1.5.2 System Constraints
 
 1. **Device & Browser Compatibility:** The platform must execute seamlessly across modern web browsers (Google Chrome 110+, Mozilla Firefox 115+, Microsoft Edge 110+, Apple Safari 16+) with responsive scaling across mobile, tablet, laptop, and ultra-wide desktop viewports.
 2. **Merchandise Discovery Constraint:** In strict adherence to competition rules, the merchandise showcase is exclusively for discovery, cataloging, and collection tracking. **No e-commerce transaction processing, payment gateways, or cart checkout functionality** are included.
@@ -153,10 +185,19 @@ The system recognizes three primary tiers of actors:
 - **Faceted Filters:** Filter by Realm Category (Anime, Gaming, etc.), Genre (Action, RPG, Sci-Fi, etc.), Release Year range, Content Type (Article, Video, Audio, Gallery), and Format.
 - **Dynamic Sorting:** Sort content by Most Popular (view count / rating score), Newest Releases, Alphabetical (A&ndash;Z, Z&ndash;A), and Top User Rated.
 
-### 1.6.4 AI-Powered Chatbot Assistant
-- **FAQ & Knowledge Retrieval:** Instant answers to common platform, fandom, and navigation queries.
-- **Contextual Recommendation Engine:** Conversational guidance that suggests specific realm content based on user mood, preferred genre, or favorite characters.
-- **Session History:** Preserves conversation threads per session for seamless multi-turn conversational assistance.
+### 1.6.4 AI-Powered Chatbot Assistant & Multi-Step Onboarding Flow
+- **Guided 4-Step Interactive Onboarding Journey:**
+  - *Step 1 (Realm Discovery & Preference Selection):* Welcomes the user with a tailored greeting, introduces the eight multiverse realms (Anime, Gaming, Movies, TV Shows, K-Pop, Comics, Manga, Cosplay), and renders interactive realm selection chips.
+  - *Step 2 (Interest Persistence & Recommendation Engine):* Automatically persists the user's chosen realms to their database profile (`UserCategory`), invokes the multi-criteria recommendation engine (`IRecommendationService`), and serves three immediate personalized content cards with quick-navigation buttons.
+  - *Step 3 (Explorer & Dashboard Walkthrough):* Explains how to leverage multi-facet filters (genres, release year, popularity sorting) and directs users to their personalized dashboard for tracking saved bookmarks and activity history.
+  - *Step 4 (Convention Discovery & Account Unlock):* Highlights the Leaflet GIS Event Explorer and Fan Submission Portal, providing actionable next steps (e.g., prompt for guest visitors to register and unlock full platform capabilities).
+- **Hybrid Intent Classification & Routing:**
+  - Classifies incoming messages into eight distinct intents: `Onboarding`, `Faq`, `Recommend`, `Search`, `Category`, `Greeting`, `Llm`, and `Fallback`.
+  - Deterministic NLP keyword scoring and word stemming match user queries against active knowledge base records, with graceful fallback to optional LLM completion (OpenAI GPT-4o-mini / Gemini) and feedback escalation.
+- **Contextual Recommendation Engine:**
+  - Detects seed phrases (e.g., "movies like Naruto", "games similar to Elden Ring") to surface cross-realm suggestions, correlating shared categories, genres, and community affinity scores.
+- **Session Continuity & Persistent Query Logging:**
+  - Maintains conversation context per browser session using unique cryptographic session tokens (`fhp.chat`), while persisting all prompt-response pairs to `ChatbotQueries` for analytics and quality assurance.
 
 ### 1.6.5 Interactive Multimedia Center
 - **Video & Trailer Streaming:** Custom video player supporting full-screen playback, volume memory, seeking, and auto-pause when out of viewport.
@@ -169,31 +210,47 @@ The system recognizes three primary tiers of actors:
 - **Fan Submissions:** Community portal allowing registered fans to submit original lore essays, cosplay crafting tutorials, and fan art for admin approval.
 
 ### 1.6.7 Merchandise Showcase & Resource Library
-- **Showcase Galleries:** Grouped displays of official action figures, collector's editions, apparel, and scale models.
-- **Status Tags:** Dynamic badges indicating `Limited Edition`, `Pre-Order`, `Convention Exclusive`, or `Archived`.
-- **View Count & Popularity Tracking:** Real-time popularity score calculation based on user views, bookmarks, and discovery inquiries.
+- **Showcase Galleries:** Grouped displays of official action figures, collector's editions, apparel, and scale models with high-definition multi-angle imagery.
+- **Dynamic Status Flags:** Real-time badge indicators (`Limited Edition`, `Pre-Order`, `Convention Exclusive`, or `Archived`).
+- **View Count & Popularity Tracking:** Real-time popularity calculation derived from page impressions, user bookmarks, and direct inquiries.
 
-### 1.6.8 User Feedback and Ratings System
+### 1.6.8 Upcoming Releases & Pre-Launch Countdown Hub
+- **Real-Time Chronological Countdown Engine:** Angular Signal-driven live countdown ticker (`CountdownComponent`) actively computing days, hours, minutes, and seconds until global launch date.
+- **Spotlight Hero Unit ("Next Up"):** Prominently displays the immediate next impending multiverse release with dynamic CSS variables matching the realm accent color, studio branding, and high-definition wide-angle backdrop.
+- **Dual-State Perspective 3D Tilt Cards:** Micro-interaction collectible cards utilizing custom 3D perspective gyroscopic tilt (`TiltDirective`, 6-degree pitch/yaw) with smooth hover flip between standard boxed package visual (`imageUrl`) and unboxed hero pose (`hoverImageUrl`).
+- **Schedule Verification & Confirmation Badges:** Explicit visual differentiation between locked release dates and tentative/estimated launch windows (`isDateConfirmed` boolean with custom warning badge).
+- **Studio & Licensor Attribution:** Explicit branding for top-tier entertainment studios (CD Projekt Red, Marvel Studios & Sideshow, Bandai Namco & FromSoftware, Toei Animation & MegaHouse, Riot Games, Lucasfilm & Hot Toys).
+- **Faceted Category & Type Filtering:** Instant reactive filtering chips across release types (`Collector Edition`, `Action Figure`, `Prop Replica`, `Deluxe Statue`, `Life-Size Sculpture`, `Concert Gear`, `Album & Merch`).
+
+### 1.6.9 User Feedback and Ratings System
 - **Structured Feedback Form:** Dynamic modal allowing visitors and registered fans to report bugs, submit feature requests, or propose fandom content additions.
 - **Admin Review Queue:** Status progression workflow (`New`, `In Review`, `Resolved`, `Closed`) with admin response notes.
 
-### 1.6.9 Bookmarking, Custom Notes, and Sharing
+### 1.6.10 Bookmarking, Custom Notes, and Sharing
 - **Universal Save Button:** Instant one-click bookmarking for any content card, character profile, or video.
 - **Personal Annotations:** Allows users to attach custom notes, viewing reminders, or cosplay craft checklists to any saved item.
 - **Native Web Share Integration:** One-click link copying and social sharing with pre-formatted OpenGraph meta cards.
 
-### 1.6.10 Location-Aware Event Discovery & Interactive Calendar
+### 1.6.11 Location-Aware Event Discovery & Interactive Calendar
 - **Interactive World Map:** Leaflet.js-powered global map plotting major conventions (Anime Expo, San Diego Comic-Con, Gamescom, Seoul K-Pop Festa).
 - **Geolocation Filter:** Browser GPS calculation enabling users to find conventions and screening meetups ordered by proximity.
 - **Event Calendar & Ticketing Links:** Chronological timeline filterable by month and city, featuring external links to official organizer ticket portals.
 
-### 1.6.11 Administration Control Panel
-- **Catalog Management:** Full Create, Read, Update, Delete (CRUD) control over all realms, contents, media, genres, and tags.
-- **Character & Merchandise Studio:** Visual management forms for character lore entries, merchandise showcases, and status flags.
+### 1.6.12 Administration Control Panel & Knowledge Base Management
+- **Admin Knowledge Base (FAQ) Studio (`/admin/faqs`):**
+  - Full Create, Read, Update, Delete (CRUD) control over chatbot knowledge items via `AdminFaqsController`.
+  - Configurable metadata: Question text, Rich Markdown Answer, Topic/Category grouping, comma-separated NLP Keywords (for fuzzy regex matching and stemming scoring), SortOrder, Active state toggle, and HitCount frequency tracking.
+  - Zero-Downtime Hot Sync: Knowledge base updates take effect instantly in the live chatbot matching pipeline without requiring application redeployment or database restarts.
+- **Assistant Query Log & Unanswered Desk (`/admin/chatbot-queries`):**
+  - Real-time audit log of all queries submitted through the chatbot interface by registered users and anonymous visitors.
+  - Intent breakdown filter (`Faq`, `Recommend`, `Search`, `Category`, `Onboarding`, `Greeting`, `Llm`, `Fallback`).
+  - Knowledge Gap Intelligence: Administrators can filter by `Fallback` intent to review questions the AI could not answer and promote them into official Knowledge Base FAQs with a single click.
+- **Catalog Management:** Full CRUD control over all realms, contents, media, genres, tags, characters, and upcoming releases.
+- **Character & Merchandise Studio:** Visual management forms for character lore entries, merchandise showcases, and release status flags.
 - **Moderation Workflow:** Dedicated review desk for approving or rejecting fan-submitted articles and user feedback.
 - **Analytics Dashboard:** Visual metric cards reporting registered user growth, category distribution, most active fandoms, and chatbot query volume.
 
-### 1.6.12 Accessibility & Immersive UI/UX Enhancements
+### 1.6.13 Accessibility & Immersive UI/UX Enhancements
 - **Three.js 3D WebGL Engine:** Dynamic 3D canvas featuring volumetric character models with normal-mapped depth, particle Ki auras, realistic contact ground shadows, dynamic point lights, and mouse parallax tilt.
 - **Accessibility Controls:** Integrated dark mode / light mode switch, variable font sizing (`sm`, `md`, `lg`), motion reduction toggle, ARIA semantic tags, and full keyboard navigation.
 - **Interactive Sitemap:** Full visual constellation sitemap embedded on the home page for instantaneous visual navigation.
@@ -358,6 +415,73 @@ flowchart TD
     NotifyUser --> Panel
     ReviewFeedback --> Panel
     ViewStats --> Panel
+```
+
+#### D. AI Chatbot Guided Onboarding Journey Flowchart
+```mermaid
+flowchart TD
+    StartChat([User Clicks Chatbot Button / Prompt]) --> Trigger[Session Initialized with fhp.chat Token]
+    Trigger --> Step1[Step 1: Multiverse Realm Discovery & Chip Selection]
+    Step1 --> UserPick{User Selection}
+    UserPick -->|Selects Realms| SaveInterests[Persist Chosen Realms to UserCategory DB]
+    UserPick -->|Skips| DefaultRecs[Use Top Platform Recommendations]
+    SaveInterests --> Step2[Step 2: Generate 3 Curated Realm Recommendation Cards]
+    DefaultRecs --> Step2
+    Step2 --> ClickPick{User Action}
+    ClickPick -->|Inspect Content| NavItem[Navigate directly to Content Detail]
+    ClickPick -->|Clicks Next| Step3[Step 3: Explorer Tour & Multi-Facet Filtering Guidance]
+    Step3 --> Step4[Step 4: Real-World Conventions Map & Account Registration CTA]
+    Step4 --> CheckAuth{Is User Authenticated?}
+    CheckAuth -- Yes --> Unlocked[Full Multiverse Exploration Unlocked]
+    CheckAuth -- No --> RegisterPrompt[Prompt Registration to Persist Bookmarks & Notes]
+    RegisterPrompt --> End([User Ready to Explore])
+    Unlocked --> End
+```
+
+#### E. Administrator Knowledge Base & Query Desk Moderation Flowchart
+```mermaid
+flowchart TD
+    AdminStart([Admin Enters Admin Chatbot Suite]) --> SwitchTab{Select Studio View}
+    SwitchTab -->|Knowledge Base FAQs| FaqView[View Existing FAQ Records & NLP Keywords]
+    SwitchTab -->|Query Audit Log| LogView[Inspect Real User Queries & Intent Classifications]
+    
+    FaqView --> FaqAction{FAQ Action}
+    FaqAction -->|Create New FAQ| FormNew[Define Question, Markdown Answer, Topic & Comma Keywords]
+    FaqAction -->|Edit FAQ| FormEdit[Update NLP Match Weights, Keywords or Active Status]
+    FaqAction -->|Delete / Deactivate| FormDelete[Toggle IsActive Flag / Remove Stale FAQ]
+    FormNew --> HotSync[Commit to DB - Instant Real-Time Sync without Restart]
+    FormEdit --> HotSync
+    FormDelete --> HotSync
+    
+    LogView --> FilterFallback[Filter Audit Log by Intent = Fallback]
+    FilterFallback --> InspectUnanswered[Analyze Common User Questions Missing from DB]
+    InspectUnanswered --> Promote{Promote to FAQ?}
+    Promote -- Yes --> FormNew
+    Promote -- No --> ArchiveLog[Archive Query Audit Record]
+    HotSync --> EndAdmin([Updated Knowledge Base Serves Live Users])
+    ArchiveLog --> EndAdmin
+```
+
+#### F. Upcoming Releases Discovery & Countdown Flowchart
+```mermaid
+flowchart TD
+    Enter([User Navigates to Upcoming Releases]) --> FetchUpcoming[API Requests UpcomingReleases OrderBy ReleaseDate]
+    FetchUpcoming --> HeroNext[Feature Immediate Next Release in Hero Spotlight]
+    HeroNext --> StartTicker[Initialize Angular Signal Countdown Timer Ticker]
+    StartTicker --> RenderCards[Render 3D Perspective Gyroscopic Tilt Cards]
+    RenderCards --> UserFilter{Filter by Release Type?}
+    UserFilter -- Yes --> ApplyChip[Filter by Collector Edition, Figure, Replica, Album, etc.]
+    UserFilter -- No --> ShowAll[Display All Scheduled Releases]
+    ApplyChip --> HoverCheck{User Hovers on Card?}
+    ShowAll --> HoverCheck
+    HoverCheck -- Yes --> FlipImage[Dual-State Flip: Transition from Boxed to Unboxed Hero Pose]
+    HoverCheck -- No --> StaticPose[Display Primary Key Visual Artwork]
+    FlipImage --> CheckDate{Is Date Confirmed?}
+    StaticPose --> CheckDate
+    CheckDate -- Yes --> ConfirmedBadge[Display Official Confirmed Launch Date]
+    CheckDate -- No --> EstBadge[Display Tentative Estimated Date Warning]
+    ConfirmedBadge --> Done([User Synchronizes Schedule / Pre-orders])
+    EstBadge --> Done
 ```
 
 ---
@@ -596,13 +720,46 @@ erDiagram
         string Status
         datetime CreatedAt
     }
+
+    UPCOMING_RELEASES {
+        int Id PK
+        int CategoryId FK
+        string Title
+        string ReleaseType
+        datetime ReleaseDate
+        boolean IsDateConfirmed
+        string Studio
+        string ImageUrl
+        string HoverImageUrl
+    }
+
+    CHATBOT_FAQS {
+        int Id PK
+        string Question
+        string Answer
+        string Category
+        string Keywords
+        int SortOrder
+        boolean IsActive
+        int HitCount
+    }
+
+    CHATBOT_QUERIES {
+        int Id PK
+        int UserId FK
+        string SessionId
+        string Message
+        string Response
+        string Intent
+        datetime CreatedAt
+    }
 ```
 
 ---
 
 ### 1.9.6 Database Relational Schema Specification
 
-The production schema is organized into 18 primary normalized relational tables:
+The production schema is organized into 22 normalized relational tables:
 
 | Table Name | Primary Key | Foreign Keys | Key Attributes & Constraints |
 | :--- | :--- | :--- | :--- |
@@ -620,12 +777,15 @@ The production schema is organized into 18 primary normalized relational tables:
 | **`ContentTags`** | Composite (`ContentId`, `TagId`) | &rarr; `Content`, `Tags` | Many-to-many content tagging |
 | **`CharacterProfiles`**| `Id` (INT, Identity) | `CategoryId` &rarr; `Categories(Id)` | `Name`, `Slug` (Unique), `Alias`, `Bio`, `ImageUrl` |
 | **`MerchandiseItems`** | `Id` (INT, Identity) | `CategoryId` &rarr; `Categories(Id)` | `Name`, `Slug` (Unique), `Tag` (Limited Edition/Pre-Order), `ImageUrl`, `IsUpcoming` |
+| **`UpcomingReleases`** | `Id` (INT, Identity) | `CategoryId` &rarr; `Categories(Id)` | `Title`, `ReleaseType`, `ReleaseDate`, `IsDateConfirmed`, `Studio`, `Description`, `ImageUrl`, `HoverImageUrl`, `ExternalUrl`, `ViewCount` |
+| **`UpcomingReleaseTags`** | Composite (`UpcomingReleaseId`, `TagId`) | &rarr; `UpcomingReleases`, `Tags` | Many-to-many upcoming release tag taxonomy |
 | **`Bookmarks`** | `Id` (INT, Identity) | `UserId` &rarr; `Users`, `ContentId` &rarr; `Content` | `Note` (NVARCHAR(1000)), `CreatedAt` |
 | **`Ratings`** | `Id` (INT, Identity) | `UserId` &rarr; `Users`, `ContentId` &rarr; `Content` | `Score` (1&ndash;5), `Review`, `CreatedAt` |
 | **`Events`** | `Id` (INT, Identity) | `CategoryId` &rarr; `Categories(Id)` | `Title`, `City`, `Country`, `Latitude`, `Longitude`, `StartDate`, `EndDate`, `TicketUrl` |
 | **`FanSubmissions`** | `Id` (INT, Identity) | `UserId` &rarr; `Users`, `CategoryId` &rarr; `Categories` | `Title`, `Content`, `Status` (Pending, Approved, Rejected), `CreatedAt` |
 | **`Feedback`** | `Id` (INT, Identity) | `UserId` &rarr; `Users(Id)` (Optional) | `Type` (Bug, Suggestion, Query), `Message`, `Status`, `CreatedAt` |
-| **`ChatbotKnowledge`**| `Id` (INT, Identity) | None | `Topic`, `QuestionPattern`, `AnswerText`, `IsActive` |
+| **`ChatbotFaqs`** | `Id` (INT, Identity) | None | `Question`, `Answer` (Markdown), `Category`, `Keywords`, `SortOrder`, `IsActive`, `HitCount` |
+| **`ChatbotQueries`** | `Id` (INT, Identity) | `UserId` &rarr; `Users(Id)` (Optional) | `SessionId`, `Message`, `Response`, `Intent`, `MatchedFaqId`, `CreatedAt` |
 
 ---
 
@@ -787,4 +947,52 @@ In compliance with the **Important Note Regarding AI Usage** on Page 11 of the c
 - **Evaluation Readiness:** The team understands and is fully prepared to defend all design decisions, algorithmic implementations, and architectural codebases during judge evaluations.
 
 ---
+
+### 1.9.12 Project Source Code Structure & Implementation File Manifest
+
+In strict adherence to the competition rule (*"Documentation should not contain any source code"*), actual source code files reside exclusively within the project directory tree (`backend/` and `frontend/`). To assist evaluators and technical auditors in navigating the codebase, this section provides an architectural file manifest outlining the exact directory hierarchy, source files, design patterns, and engineering responsibilities of each key module.
+
+#### 1. Backend Web API Architecture Manifest (.NET 8 Clean Architecture)
+
+The backend follows a layered, service-oriented RESTful architecture with Entity Framework Core, structured as follows:
+
+| Layer / Directory | File Path | Design Pattern / Technology | Technical Responsibility & Features |
+| :--- | :--- | :--- | :--- |
+| **API Endpoints (Admin)** | `backend/FanHubPlus.Api/Controllers/Admin/AdminResourceControllers.cs` | Generic CRUD Base Controller, Authorize(Roles = "Admin") | Complete administrative CRUD operations for categories, tags, character profiles, events, merchandise, upcoming releases, and chatbot FAQs. |
+| **API Endpoints (Admin)** | `backend/FanHubPlus.Api/Controllers/Admin/AdminUsersController.cs` | REST Controller, Role-based Access Control | User account moderation, role upgrades (Admin/User), account status toggling, and user search. |
+| **API Endpoints (Admin)** | `backend/FanHubPlus.Api/Controllers/Admin/AdminAnalyticsController.cs` | Aggregation Pipeline | Real-time system analytics: total users, active contents, query volume, event participation, and user ratings. |
+| **API Endpoints (Public/User)** | `backend/FanHubPlus.Api/Controllers/AuthController.cs` | JWT + Refresh Token Rotation | User registration, login authentication, token refresh, password updates, and avatar uploads. |
+| **API Endpoints (Public/User)** | `backend/FanHubPlus.Api/Controllers/ChatbotController.cs` | Async REST Controller | Natural language fan queries, multi-step onboarding session handling, and query audit logging. |
+| **API Endpoints (Public/User)** | `backend/FanHubPlus.Api/Controllers/DiscoveryControllers.cs` | Projection Queries | Endpoints for Upcoming Releases countdown, character rosters, events GIS search, and personalized recommendations. |
+| **API Endpoints (Public/User)** | `backend/FanHubPlus.Api/Controllers/UserDashboardController.cs` | User Scoped REST Controller | Personal bookmarks management with custom notes, ratings, fan submission history, and activity logging. |
+| **Business Services** | `backend/FanHubPlus.Api/Services/ChatbotService.cs` | Rule-Engine & Fuzzy NLP Matcher | 4-step guided onboarding conversational flow, keyword scoring algorithm, and admin-managed FAQ knowledge matching. |
+| **Business Services** | `backend/FanHubPlus.Api/Services/RecommendationService.cs` | Collaborative & Content-Based Filtering | Personalized content recommendations driven by user category preferences, bookmark history, and rating weightings. |
+| **Business Services** | `backend/FanHubPlus.Api/Services/DiscoveryService.cs` | High-Performance LINQ Projections | Fast cached data delivery for upcoming releases, spotlight banners, and character profiles. |
+| **Business Services** | `backend/FanHubPlus.Api/Services/TokenService.cs` | HMAC-SHA256 Cryptography | Stateless JWT access token generation and cryptographically secure random refresh token generation. |
+| **Data & Persistence** | `backend/FanHubPlus.Api/Data/AppDbContext.cs` | Entity Framework Core DbContext | Relational mappings, fluent API configurations, unique constraints, and cascade delete configurations. |
+| **Domain Entities** | `backend/FanHubPlus.Api/Entities/` | Domain-Driven Entity Models | Strong typing for `User`, `Category`, `Content`, `MediaItem`, `UpcomingRelease`, `ChatbotFaq`, `Bookmark`, `Rating`, `Event`. |
+| **Data Initialization** | `backend/FanHubPlus.Api/Data/DbInitializer.cs` | Automated Seeder Pipeline | Database creation check, schema validation, and automatic population of comprehensive seed data across all 8 realms. |
+
+#### 2. Frontend Single Page Application Manifest (Angular 19 Standalone Signals)
+
+The client application is built with modern Angular standalone components, signals-based reactive state, and Three.js 3D acceleration:
+
+| Feature Area | File / Directory Path | Architectural Pattern | Component Responsibility & UI Capabilities |
+| :--- | :--- | :--- | :--- |
+| **Multiverse Realms** | `frontend/src/app/features/realm/realm.component.ts` | Reactive Route-Driven Component | Immersive realm landing pages for all 8 fandoms with dynamic thematic styling, color palettes, and realm spotlight feeds. |
+| **3D WebGL Realm Stages** | `frontend/src/app/features/three-stage/three-stage.component.ts` | Three.js Scene Graph & WebGL Renderer | Real-time interactive 3D character stages (e.g. Super Saiyan God Goku, Captain America), dynamic lighting, God Ki particle vortex, and cosmic portals. |
+| **Content Explorer** | `frontend/src/app/features/catalog/catalog.component.ts` | Multi-Facet Signal Filtering | Instant search by keyword, realm category, genre, release year, popularity rating, and sorting (Latest, Popular, A-Z). |
+| **Multimedia Center** | `frontend/src/app/features/media/media-detail.component.ts` | HTML5 Media Streaming & Signals | Integrated video trailers, audio podcast streaming, cosplay craft demonstrations, user comments, and 5-star ratings. |
+| **Upcoming Releases Hub** | `frontend/src/app/features/merch/upcoming.component.ts` | Computed Signals & 3D Tilt Cards | Real-time launch countdown engine, release type filtering, dual-state card flip interactions, and studio highlights. |
+| **AI Chatbot Assistant** | `frontend/src/app/features/chatbot/chatbot-drawer.component.ts` | Slide-Out Drawer & Interactive Stepper | AI conversational interface with multi-step interactive onboarding walkthrough, dynamic suggestion pills, and markdown replies. |
+| **Admin Control Suite** | `frontend/src/app/features/admin/admin-chatbot.component.ts` | Dual-Tab CRUD & Log Inspector | Admin Knowledge Base management: FAQ creation/editing/activation and live audit log of fan inquiries with intent detection. |
+| **Admin Management Views** | `frontend/src/app/features/admin/` | Standardized Admin Grid & Form | Full administrative management of Users, Contents, Categories, Character Profiles, Events, Merchandise, and Fan Submissions. |
+| **Interactive Event Map** | `frontend/src/app/features/events/events.component.ts` | Leaflet GIS & Geolocation Engine | Interactive world map with custom fandom markers, GPS radius distance filtering, calendar view, and external ticket redirects. |
+| **Personal Fan Dashboard** | `frontend/src/app/features/dashboard/dashboard.component.ts` | User Profile & Bookmark Manager | Personalized fan space displaying favorite realms, recent activity, bookmarked content with custom private notes, and fan build submissions. |
+| **Core Services** | `frontend/src/app/core/services/api.service.ts` | Reactive HttpClient Wrapper | Type-safe REST client communicating with all ASP.NET Core endpoints with automatic error interceptors. |
+| **Authentication Service** | `frontend/src/app/core/services/auth.service.ts` | Signal State & Token Storage | Manages user session state, JWT decoding, role extraction, refresh token renewal, and login/logout lifecycles. |
+| **Directives & UI Utility** | `frontend/src/app/core/directives/directives.ts` | Custom DOM Directives | `appTilt` (gyroscope/mouse 3D perspective tilt), `appReveal` (staggered scroll animations), and image lazy-loaders. |
+
+---
 *End of Documentation & SRS Specification*
+

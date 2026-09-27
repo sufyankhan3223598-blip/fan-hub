@@ -1,4 +1,4 @@
-﻿import { ChangeDetectionStrategy, Component, ElementRef, HostListener, OnDestroy, OnInit, computed, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, HostListener, OnDestroy, OnInit, computed, inject, input, output, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { IconComponent } from './icon.component';
 import { ToastService } from '../../core/services/ui.services';
@@ -14,17 +14,19 @@ import { ToastService } from '../../core/services/ui.services';
     :host { display: inline-flex; align-items: center; justify-content: center; }
     .nexus-mark {
       object-fit: contain;
-      filter: drop-shadow(0 2px 8px rgba(212, 175, 55, 0.45));
-      border-radius: 50%;
+      filter: drop-shadow(0 2px 8px rgba(124, 58, 237, 0.4)) drop-shadow(0 0 10px rgba(245, 200, 106, 0.35));
       display: block;
       transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s;
     }
     :host(:hover) .nexus-mark {
-      transform: scale(1.08) rotate(6deg);
-      filter: drop-shadow(0 0 16px rgba(212, 175, 55, 0.8));
+      transform: scale(1.08);
+      filter: drop-shadow(0 0 18px rgba(212, 175, 55, 0.85));
     }
-    .spin { animation: logoSpin 16s linear infinite; }
-    @keyframes logoSpin { to { transform: rotate(360deg); } }
+    .spin { animation: logoPulse 2.5s ease-in-out infinite; }
+    @keyframes logoPulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4)); }
+      50% { transform: scale(1.1); filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.95)); }
+    }
   `]
 })
 export class LogoComponent {
