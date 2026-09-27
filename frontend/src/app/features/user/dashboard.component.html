@@ -1,0 +1,117 @@
+﻿<app-user-shell>
+  @if (d(); as d) {
+    <div class="dash-tilt">
+
+      <section class="greet panel">
+        <div class="greet-left">
+          <span class="avatar xl online">
+            @if (d.user.avatarUrl) { <img [src]="d.user.avatarUrl | asset" alt="" /> } @else { {{ d.user.fullName | initials }} }
+          </span>
+          <div>
+            <span class="eyebrow">{{ d.greeting }}</span>
+            <h1 class="display-md mt-1 mb-1">{{ d.user.fullName.split(' ')[0] }}, welcome to your hub</h1>
+            <p class="m-0 text-muted-fh">{{ d.streak > 0 ? d.streak + '-day streak - keep exploring!' : 'Start a streak by exploring a realm today.' }}</p>
+            <div class="chip-row mt-3">
+              @for (c of d.user.categories; track c.id) { <a class="chip" [routerLink]="['/realm', c.slug]">{{ c.name }}</a> }
+              <a class="chip" routerLink="/profile"><app-icon name="plus" /> Edit interests</a>
+            </div>
+          </div>
+        </div>
+        <div class="greet-promo">
+          <app-icon name="sparkles" />
+          <strong>Share your creation</strong>
+          <p>Write an article, post fan art or a cosplay build.</p>
+          <a routerLink="/submit" class="btn-fh btn-gold btn-sm">Submit content</a>
+        </div>
+      </section>
+
+      @if (!d.user.emailVerified) {
+        <div class="verify-banner royal-verify-banner">
+          <div class="verify-banner-content">
+            <app-icon name="mail" />
+            <span><strong>Email Verification Pending:</strong> A verification notification was sent to your email. Please verify to unlock all community features.</span>
+          </div>
+          <div class="verify-banner-actions">
+            <button type="button" class="btn-fh btn-sm" (click)="resend()">Resend Link</button>
+            @if (devLink(); as l) { <a class="btn-fh btn-sm btn-gold" [routerLink]="devPath(l).split('?')[0]" [queryParams]="{ token: devPath(l).split('token=')[1] }">Verify Email Now &rarr;</a> }
+          </div>
+        </div>
+      }
+
+
+      <div class="kpi-grid mt-4">
+        @for (k of d.kpis; track k.key) {
+          <div class="kpi" [style.--accent]="kpiColors[k.key]">
+            <span class="kpi-icon"><app-icon [name]="kpiIcons[k.key] || 'activity'" /></span>
+            <span class="kpi-label">{{ k.label }}</span>
+            <span class="kpi-value" [appCountUp]="k.value"></span>
+            <span class="kpi-change" [class.up]="k.change > 0" [class.down]="k.change < 0">{{ k.change > 0 ? '+' : '' }}{{ k.change }}% vs last 2 weeks</span>
+            <app-sparkline [values]="k.trend" [color]="kpiColors[k.key]" />
+          </div>
+        }
+      </div>
+
+      <div class="dash-grid mt-4">
+        <div class="panel span-8">
+          <div class="panel-title"><h3>Your activity</h3><span class="sub">Last 14 days</span></div>
+          <app-area-chart [series]="d.activitySeries" [labels]="d.activityLabels" ariaLabel="Activity over the last 14 days" />
+        </div>
+        <div class="panel span-4">
+          <div class="panel-title"><h3>Favorite realms</h3><span class="sub">By views</span></div>
+          <app-donut-chart [slices]="d.categoryBreakdown" centerLabel="Views" />
+        </div>
+
+        <div class="panel span-4">
+          <div class="panel-title"><h3>Recent activity</h3></div>
+          <ol class="activity">
+            @for (a of d.recentActivity; track a.id) {
+              <li><span class="a-icon"><app-icon [name]="activityIcons[a.activityType] || 'activity'" /></span>
+                <div>@if (a.url) { <a [routerLink]="a.url">{{ a.description }}</a> } @else { <span>{{ a.description }}</span> }<small>{{ a.createdAt | timeAgo }}</small></div></li>
+            } @empty { <p class="text-muted-fh">No activity yet.</p> }
+          </ol>
+        </div>
+        <div class="panel span-8">
+          <div class="panel-title"><h3>Bookmarked</h3><a routerLink="/bookmarks" class="link-arrow">All bookmarks <app-icon name="arrow-right" /></a></div>
+          <div class="bm-grid">
+            @for (b of d.bookmarks; track b.id) {
+              <a class="bm" [routerLink]="b.url">
+                <img [src]="b.imageUrl | asset" alt="" loading="lazy" />
+                <span><small>{{ b.itemType }}</small><strong>{{ b.title }}</strong>@if (b.note) { <em><app-icon name="edit" /> {{ b.note }}</em> }</span>
+              </a>
+            } @empty { <p class="text-muted-fh">Bookmark titles, characters, media and merch to see them here.</p> }
+          </div>
+        </div>
+
+        <div class="panel span-12">
+          <div class="panel-title"><h3>Recommended for you</h3><button type="button" class="link-arrow" style="background:none;border:none;cursor:pointer" (click)="ui.openChat('Recommend something')">Ask the assistant <app-icon name="bot" /></button></div>
+          <div class="h-scroll">
+            @for (c of d.recommendations; track c.id) {
+              <app-dual-card [image]="c.imageUrl" [hoverImage]="c.hoverImageUrl" [title]="c.title" [eyebrow]="c.categoryName + ' / ' + c.releaseYear" [accent]="c.accentColor"
+                [link]="'/content/' + c.slug" [rating]="c.averageRating" [tags]="c.tags" itemType="Content" [itemId]="c.id" />
+            }
+          </div>
+        </div>
+
+        <div class="panel span-6">
+          <div class="panel-title"><h3>Favorite fandoms</h3><a routerLink="/profile" class="link-arrow">Edit <app-icon name="edit" /></a></div>
+          <div class="chip-row mb-3">@for (f of d.user.favoriteFandoms; track f) { <span class="chip active"><app-icon name="heart" /> {{ f }}</span> } @empty { <span class="text-muted-fh">Add favorite fandoms in your profile.</span> }</div>
+          <div class="fandom-list">
+            @for (c of d.favoriteFandomContent; track c.id) {
+              <a [routerLink]="'/content/' + c.slug" class="fl" [style.--accent]="c.accentColor"><img [src]="c.imageUrl | asset" alt="" /><span><strong>{{ c.title }}</strong><small>{{ c.categoryName }} &middot; {{ c.format }}</small></span><app-icon name="arrow-right" /></a>
+            }
+          </div>
+        </div>
+        <div class="panel span-6">
+          <div class="panel-title"><h3>Notifications</h3></div>
+          @for (n of d.notifications; track n.id) {
+            <div class="note-row" [class.unread]="!n.isRead"><span class="nd"></span><div><strong>{{ n.title }}</strong><p>{{ n.message }}</p><small>{{ n.createdAt | timeAgo }}</small></div></div>
+          } @empty { <p class="text-muted-fh">No notifications.</p> }
+          <h4 class="mt-4 mb-2 upcoming-h">Upcoming events</h4>
+          @for (e of d.upcomingEvents; track e.id) {
+            <a class="ev" [routerLink]="['/events', e.slug]" [style.--accent]="e.accentColor"><span class="evd">{{ e.startDate | date: 'MMM d' }}</span><span>{{ e.title }} &middot; <small>{{ e.city }}</small></span></a>
+          }
+        </div>
+      </div>
+    </div>
+  } @else { <app-spinner label="Loading your hub" /> }
+</app-user-shell>

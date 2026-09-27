@@ -1,0 +1,139 @@
+﻿<section class="media-hero">
+  <div class="container-fh">
+    <app-breadcrumbs [items]="[{ label: 'Multimedia Center' }]" />
+    <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mt-3">
+      <div>
+        <span class="eyebrow">Interactive Multimedia Center</span>
+        <h1 class="display-lg mt-2">Watch. Listen. Rate.</h1>
+        <p class="lead m-0">Trailers, animated explainers, original soundtracks and podcasts from every realm.</p>
+      </div>
+      <div class="tabs-fh" role="tablist">
+        <button type="button" [class.active]="kind() === 'all'" (click)="setKind('all')">All</button>
+        <button type="button" [class.active]="kind() === 'video'" (click)="setKind('video')"><app-icon name="film" /> Video</button>
+        <button type="button" [class.active]="kind() === 'audio'" (click)="setKind('audio')"><app-icon name="music" /> Audio</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container-fh">
+
+  @if (featured(); as f) {
+    <div class="stage" id="stage" [style.--accent]="f.accentColor">
+      <div class="stage-player">
+        @if (f.locked) {
+          <div class="locked-stage">
+            <img [src]="f.imageUrl | asset" [alt]="f.title" />
+            <div class="locked-overlay">
+              <app-icon name="lock" />
+              <h3>Playback is for members</h3>
+              <p>Create a free account to stream trailers, explainers and soundtracks.</p>
+              <div class="d-flex gap-2 justify-content-center"><a class="btn-fh btn-gold btn-sm" routerLink="/login" [queryParams]="{ returnUrl: '/media' }">Login to unlock</a><a class="btn-fh btn-ghost btn-sm" routerLink="/register">Join free</a></div>
+            </div>
+          </div>
+        } @else if (isAudio(f)) {
+          <div class="audio-stage">
+            <img [src]="f.hoverImageUrl | asset" alt="" class="audio-art" />
+            <app-audio-player [url]="f.url ?? ''" [title]="f.title" [accent]="f.accentColor" />
+          </div>
+        } @else {
+          <app-video-player [url]="f.url ?? ''" [posterUrl]="f.imageUrl" [embedType]="f.embedType" [title]="f.title" />
+        }
+      </div>
+      <div class="stage-info">
+        <span class="eyebrow">{{ f.categoryName }} &middot; {{ f.mediaType }}</span>
+        <h2>{{ f.title }}</h2>
+        <p>{{ f.description }}</p>
+        <div class="meta-row mb-3"><span><app-icon name="clock" /> {{ f.durationSeconds | duration }}</span><span class="sep"></span><span><app-icon name="eye" /> {{ f.viewCount | compact }} plays</span></div>
+        <div class="chip-row mb-3">@for (t of f.tags; track t.id) { <span class="tag-badge" [style.--tag-color]="t.color">{{ t.name }}</span> }</div>
+        <app-rating itemType="Media" [itemId]="f.id" />
+        <div class="d-flex gap-2 mt-3">
+          <app-bookmark-button itemType="Media" [itemId]="f.id" [title]="f.title" variant="full" />
+          <a class="btn-fh btn-sm" [routerLink]="['/media', f.id]">Open page <app-icon name="arrow-right" /></a>
+        </div>
+      </div>
+    </div>
+  }
+
+
+  <div class="media-filters">
+    <div class="filters-wrap">
+      <app-admin-select
+        [options]="typeOptions()"
+        [value]="type()"
+        placeholder="All types"
+        ariaLabel="Media Type"
+        (valueChange)="setType($event)" />
+
+      <app-admin-select
+        [options]="tagOptions()"
+        [value]="tag()"
+        placeholder="All tags"
+        ariaLabel="Tag"
+        (valueChange)="setTag($event)" />
+
+      <app-admin-select
+        [options]="categoryOptions()"
+        [value]="category()"
+        placeholder="All realms"
+        ariaLabel="Realm"
+        (valueChange)="category.set($event); page.set(1)" />
+
+      <app-admin-select
+        [options]="sortOptions"
+        [value]="sort()"
+        placeholder="Sort by"
+        ariaLabel="Sort"
+        (valueChange)="sort.set($event)" />
+    </div>
+
+    @if (type() || tag() || category() || sort() !== 'popular') {
+      <button type="button" class="btn-clear-filters" (click)="resetFilters()" title="Reset all filters">
+        <app-icon name="x" /> Clear filters
+      </button>
+    }
+  </div>
+
+  @if (!result()) { <app-spinner label="Loading media" /> }
+  @else if (result()!.items.length === 0) { <app-empty-state icon="film" title="No media found" message="Try another tag or realm." /> }
+  @else {
+    @if (video().length) {
+      <h3 class="list-title"><app-icon name="film" /> Videos &amp; trailers</h3>
+      <div class="media-video-grid">
+        @for (m of video(); track m.id) {
+          <article class="media-card" appTilt [tiltMax]="6" [class.active]="featured()?.id === m.id" [style.--accent]="m.accentColor"
+            (mouseenter)="preview($event, m, true)" (mouseleave)="preview($event, m, false)" data-cursor="play">
+            <button type="button" class="thumb" (click)="select(m)" [attr.aria-label]="'Play ' + m.title">
+              <img [src]="m.imageUrl | asset" [alt]="m.title" loading="lazy" />
+              <video muted loop playsinline preload="none"></video>
+              <span class="play-dot"><app-icon [name]="m.locked ? 'lock' : 'play'" /></span>
+              <span class="dur">{{ m.durationSeconds | duration }}</span>
+              @if (m.embedType === 'youtube') { <span class="src-badge">YouTube</span> }
+            </button>
+            <div class="mc-body">
+              <span class="card-eyebrow">{{ m.categoryName }} &middot; {{ m.mediaType }}</span>
+              <h4>{{ m.title }}</h4>
+              <div class="mc-meta"><span><app-icon name="star-filled" /> {{ m.averageRating.toFixed(1) }}</span><span><app-icon name="thumbs-up" /> {{ m.likeCount }}</span><span><app-icon name="eye" /> {{ m.viewCount | compact }}</span></div>
+            </div>
+          </article>
+        }
+      </div>
+    }
+    @if (audio().length) {
+      <h3 class="list-title mt-5"><app-icon name="music" /> Soundtracks &amp; podcasts</h3>
+      <div class="audio-list">
+        @for (m of audio(); track m.id; let i = $index) {
+          <button type="button" class="audio-row" [class.active]="featured()?.id === m.id" (click)="select(m)" [style.--accent]="m.accentColor">
+            <span class="num">{{ (i + 1).toString().padStart(2, '0') }}</span>
+            <img [src]="m.imageUrl | asset" alt="" loading="lazy" />
+            <span class="ar-text"><strong>{{ m.title }}</strong><small>{{ m.categoryName }} &middot; {{ m.mediaType }}</small></span>
+            <span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+            <span class="ar-dur">{{ m.durationSeconds | duration }}</span>
+            <app-icon [name]="m.locked ? 'lock' : 'play'" />
+          </button>
+        }
+      </div>
+    }
+    <app-pagination [page]="page()" [totalPages]="result()!.totalPages" (pageChange)="page.set($event)" />
+  }
+</section>

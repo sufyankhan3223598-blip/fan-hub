@@ -1,0 +1,97 @@
+﻿<div class="preloader" #root [class.transform]="phase() !== 'charging'" role="status" aria-live="polite" [attr.aria-label]="'Loading Fan Hub Plus ' + percent() + '%'">
+  <div class="stage">
+    <svg class="scene" viewBox="0 0 760 520" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+      <defs>
+        <radialGradient id="auraGrad" cx="50%" cy="60%" r="50%">
+          <stop class="aura-stop-a" offset="0" stop-color="#E0F7FF" stop-opacity="0.95" />
+          <stop class="aura-stop-b" offset="0.45" stop-color="#38BDF8" stop-opacity="0.55" />
+          <stop offset="1" stop-color="#1E3A8A" stop-opacity="0" />
+        </radialGradient>
+        <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#15151f" /><stop offset="1" stop-color="#05050a" />
+        </linearGradient>
+        <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="4" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+        <filter id="soft"><feGaussianBlur stdDeviation="14" /></filter>
+      </defs>
+
+
+      <ellipse cx="380" cy="424" rx="330" ry="26" fill="#0d0d16" />
+      <line x1="40" y1="420" x2="720" y2="420" stroke="rgba(255,255,255,.08)" />
+      <g class="cracks" filter="url(#glow)">
+        <path class="crack" d="M380 420 L340 432 L300 428 L250 440 L190 436" />
+        <path class="crack" d="M380 420 L420 434 L470 429 L520 442 L585 437" />
+        <path class="crack" d="M380 420 L372 442 L352 458" />
+        <path class="crack" d="M380 420 L396 446 L420 466" />
+        <path class="crack" d="M300 428 L286 448" />
+        <path class="crack" d="M470 429 L486 452" />
+      </g>
+
+
+      <g class="aura">
+        <ellipse cx="380" cy="320" rx="165" ry="205" fill="url(#auraGrad)" filter="url(#soft)" />
+        <path class="aura-inner" d="M380 90 C 450 170, 470 250, 452 330 C 440 390, 410 420, 380 422 C 350 420, 320 390, 308 330 C 290 250, 310 170, 380 90 Z"
+          fill="url(#auraGrad)" opacity="0.7" />
+      </g>
+
+
+      @for (r of rocks; track $index) {
+        <polygon class="rock" [attr.points]="(r.x) + ',' + (412) + ' ' + (r.x + r.size) + ',' + (408 - r.size / 2) + ' ' + (r.x + r.size * 1.6) + ',' + (414) + ' ' + (r.x + r.size * 0.8) + ',' + (420)" />
+      }
+
+
+      @for (w of winds; track $index) {
+        <line class="wind" [class.left]="w.left" [attr.x1]="w.left ? 120 : 640 - w.w" [attr.x2]="w.left ? 120 + w.w : 640" [attr.y1]="w.y" [attr.y2]="w.y" [style.animation-delay.s]="w.d" />
+      }
+
+
+      <polyline class="bolt" points="300,150 318,196 302,204 330,262" />
+      <polyline class="bolt" points="462,140 446,190 464,198 436,258" />
+      <polyline class="bolt" points="250,280 286,300 270,314 306,338" />
+      <polyline class="bolt" points="510,270 476,296 494,308 458,336" />
+
+
+      <g class="warrior">
+
+        <path class="rim limb-rim" d="M362 330 L334 372 L326 414" />
+        <path class="rim limb-rim" d="M398 330 L426 372 L434 414" />
+        <path class="limb" d="M362 330 L334 372 L326 414" />
+        <path class="limb" d="M398 330 L426 372 L434 414" />
+        <ellipse class="body rim" cx="320" cy="418" rx="20" ry="7" />
+        <ellipse class="body rim" cx="440" cy="418" rx="20" ry="7" />
+
+        <path class="rim arm-rim" d="M346 270 L316 302 L328 334" />
+        <path class="rim arm-rim" d="M414 270 L444 302 L432 334" />
+        <path class="arm" d="M346 270 L316 302 L328 334" />
+        <path class="arm" d="M414 270 L444 302 L432 334" />
+        <circle class="body rim" cx="328" cy="338" r="11" />
+        <circle class="body rim" cx="432" cy="338" r="11" />
+
+        <path class="body rim" d="M334 258 Q380 244 426 258 L412 330 Q380 340 348 330 Z" />
+        <rect class="belt" x="346" y="320" width="68" height="9" rx="3" />
+
+        <circle class="body rim" cx="380" cy="228" r="21" />
+        <path class="hair rim" d="M357 236 L343 214 L358 219 L346 190 L366 206 L364 176 L380 200 L388 166 L394 200 L412 176 L408 206 L424 192 L414 220 L428 216 L404 238 Q380 214 357 236 Z" />
+        <path class="eye" d="M370 230 L377 232 M383 232 L390 230" />
+      </g>
+
+
+      @for (s of sparks; track $index) {
+        <circle class="spark" [attr.cx]="s.x" [attr.cy]="s.y" r="2.2" [style.animation-delay.s]="s.d" />
+      }
+
+      <circle class="shockwave" cx="380" cy="320" r="60" />
+    </svg>
+  </div>
+
+  <div class="hud">
+    <span class="hud-label">{{ phase() === 'charging' ? 'Charging power level' : 'Transformation complete' }}</span>
+    <div class="pct"><span>{{ percent() }}</span><small>%</small></div>
+    <div class="bar"><i [style.width.%]="percent()"></i></div>
+    <span class="brand">FAN HUB <b>PLUS</b></span>
+  </div>
+
+  <button type="button" class="skip" (click)="skip()">Skip intro</button>
+  <div class="flash" aria-hidden="true"></div>
+</div>

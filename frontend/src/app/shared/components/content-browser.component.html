@@ -1,0 +1,243 @@
+﻿<div class="content-browser-wrap" [style.--accent]="accent()">
+
+  <div class="prime-toolbar">
+
+    <div class="prime-search">
+      <app-icon name="search" />
+      <input type="text" placeholder="Search titles, creators..." [value]="search()" (input)="onSearch($any($event.target).value)" autocomplete="off" aria-label="Search content" />
+      @if (search()) {
+        <button type="button" class="clear-btn" (click)="clearSearch()" aria-label="Clear search">
+          <app-icon name="x" />
+        </button>
+      }
+    </div>
+
+
+    <div class="prime-controls">
+
+      @if (!category()) {
+        <div class="prime-drop">
+          <button type="button" class="prime-trigger" [class.open]="openDropdown() === 'category'" [class.active]="selectedCats().length > 0"
+                  (click)="toggleDropdown('category', $event)" [attr.aria-expanded]="openDropdown() === 'category'">
+            <span class="ico"><app-icon name="compass" /></span>
+            <span>{{ activeCatLabel() }}</span>
+            @if (selectedCats().length > 0) { <span class="active-dot"></span> }
+            <span class="chev"><app-icon name="chevron-down" /></span>
+          </button>
+          @if (openDropdown() === 'category') {
+            <div class="prime-menu align-left" (click)="$event.stopPropagation()">
+              <div class="menu-head">Select Realm</div>
+              <div class="menu-list">
+                <button type="button" class="menu-item" [class.selected]="selectedCats().length === 0" (click)="selectSingleCategory(null)">
+                  <span class="item-label">All Realms</span>
+                  <span class="check-ico"><app-icon name="check" /></span>
+                </button>
+                @for (c of cats.categories(); track c.id) {
+                  <button type="button" class="menu-item" [class.selected]="selectedCats().includes(c.slug)" (click)="selectSingleCategory(c.slug)">
+                    <span class="item-label">{{ c.name }}</span>
+                    <span class="check-ico"><app-icon name="check" /></span>
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+
+      @if (genres().length > 0) {
+        <div class="prime-drop">
+          <button type="button" class="prime-trigger" [class.open]="openDropdown() === 'genre'" [class.active]="selectedGenres().length > 0"
+                  (click)="toggleDropdown('genre', $event)" [disabled]="!auth.isLoggedIn()" [attr.aria-expanded]="openDropdown() === 'genre'">
+            <span class="ico"><app-icon name="tag" /></span>
+            <span>{{ activeGenreLabel() }}</span>
+            @if (selectedGenres().length > 0) { <span class="active-dot"></span> }
+            <span class="chev"><app-icon name="chevron-down" /></span>
+          </button>
+          @if (openDropdown() === 'genre') {
+            <div class="prime-menu" (click)="$event.stopPropagation()">
+              <div class="menu-head">Select Genre</div>
+              <div class="menu-list">
+                <button type="button" class="menu-item" [class.selected]="selectedGenres().length === 0" (click)="selectSingleGenre(null)">
+                  <span class="item-label">All Genres</span>
+                  <span class="check-ico"><app-icon name="check" /></span>
+                </button>
+                @for (g of genres(); track g.id) {
+                  <button type="button" class="menu-item" [class.selected]="selectedGenres().includes(g.slug)" (click)="selectSingleGenre(g.slug)">
+                    <span class="item-label">{{ g.name }}</span>
+                    <span class="check-ico"><app-icon name="check" /></span>
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+
+      <div class="prime-drop">
+        <button type="button" class="prime-trigger" [class.open]="openDropdown() === 'type'" [class.active]="types().length > 0"
+                (click)="toggleDropdown('type', $event)" [disabled]="!auth.isLoggedIn()" [attr.aria-expanded]="openDropdown() === 'type'">
+          <span class="ico"><app-icon name="layers" /></span>
+          <span>{{ activeTypeLabel() }}</span>
+          @if (types().length > 0) { <span class="active-dot"></span> }
+          <span class="chev"><app-icon name="chevron-down" /></span>
+        </button>
+        @if (openDropdown() === 'type') {
+          <div class="prime-menu" (click)="$event.stopPropagation()">
+            <div class="menu-head">Content Type</div>
+            <div class="menu-list">
+              <button type="button" class="menu-item" [class.selected]="types().length === 0" (click)="selectSingleType(null)">
+                <span class="item-label">All Types</span>
+                <span class="check-ico"><app-icon name="check" /></span>
+              </button>
+              @for (t of contentTypes; track t) {
+                <button type="button" class="menu-item" [class.selected]="types().includes(t)" (click)="selectSingleType(t)">
+                  <span class="item-label">{{ t }}</span>
+                  <span class="check-ico"><app-icon name="check" /></span>
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+
+      <div class="prime-drop">
+        <button type="button" class="prime-trigger" [class.open]="openDropdown() === 'sort'" [class.active]="sort() !== 'popular'"
+                (click)="toggleDropdown('sort', $event)" [disabled]="!auth.isLoggedIn()" [attr.aria-expanded]="openDropdown() === 'sort'">
+          <span class="ico"><app-icon name="sliders" /></span>
+          <span>{{ activeSortLabel() }}</span>
+          <span class="chev"><app-icon name="chevron-down" /></span>
+        </button>
+        @if (openDropdown() === 'sort') {
+          <div class="prime-menu" (click)="$event.stopPropagation()">
+            <div class="menu-head">Sort By</div>
+            <div class="menu-list">
+              @for (s of sorts; track s.v) {
+                <button type="button" class="menu-item" [class.selected]="sort() === s.v" (click)="selectSort(s.v)">
+                  <span class="item-label">{{ s.l }}</span>
+                  <span class="check-ico"><app-icon name="check" /></span>
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+
+      <div class="prime-drop">
+        <button type="button" class="prime-trigger" [class.open]="openDropdown() === 'filters'" [class.active]="hasAdvFilters()"
+                (click)="toggleDropdown('filters', $event)" [disabled]="!auth.isLoggedIn()" [attr.aria-expanded]="openDropdown() === 'filters'">
+          <span class="ico"><app-icon name="filter" /></span>
+          <span>Filters</span>
+          @if (advFilterCount() > 0) {
+            <span class="active-dot"></span>
+          }
+          <span class="chev"><app-icon name="chevron-down" /></span>
+        </button>
+        @if (openDropdown() === 'filters') {
+          <div class="prime-menu prime-advanced-menu" (click)="$event.stopPropagation()">
+            <div class="menu-head">Advanced Filters</div>
+            <h6>Release Year</h6>
+            <div class="adv-year-row">
+              <input type="number" min="1950" max="2030" placeholder="From" [value]="yearFrom() ?? ''" (change)="setNum('from', $any($event.target).value)" aria-label="From year" />
+              <input type="number" min="1950" max="2030" placeholder="To" [value]="yearTo() ?? ''" (change)="setNum('to', $any($event.target).value)" aria-label="To year" />
+            </div>
+
+            <h6>Minimum Popularity</h6>
+            <div class="adv-range-wrap">
+              <input class="range-fh" type="range" min="0" max="900" step="50" [value]="minPopularity()" (change)="setNum('pop', $any($event.target).value)" aria-label="Minimum popularity" />
+              <div class="range-val">
+                <span>Min: <b>{{ minPopularity() }}</b></span>
+                <span>Max: 900</span>
+              </div>
+            </div>
+
+            <div class="adv-footer">
+              @if (hasAdvFilters()) {
+                <button type="button" class="reset-btn" (click)="clearYearRange(); clearPopularity()">Clear</button>
+              } @else {
+                <span></span>
+              }
+              <button type="button" class="done-btn" (click)="closeDropdown()">Apply</button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+
+  @if (activeCount() > 0) {
+    <div class="prime-active-bar">
+      <span class="active-label">Active:</span>
+      @for (c of selectedCats(); track c) {
+        <span class="prime-badge">{{ c }} <button type="button" (click)="removeCategory(c)" aria-label="Remove"><app-icon name="x" /></button></span>
+      }
+      @for (g of selectedGenres(); track g) {
+        <span class="prime-badge">{{ genreName(g) }} <button type="button" (click)="removeGenre(g)" aria-label="Remove"><app-icon name="x" /></button></span>
+      }
+      @for (t of types(); track t) {
+        <span class="prime-badge">{{ t }} <button type="button" (click)="removeType(t)" aria-label="Remove"><app-icon name="x" /></button></span>
+      }
+      @if (yearFrom() || yearTo()) {
+        <span class="prime-badge">{{ yearFrom() ?? 'Any' }} - {{ yearTo() ?? 'Now' }} <button type="button" (click)="clearYearRange()" aria-label="Remove"><app-icon name="x" /></button></span>
+      }
+      @if (minPopularity() > 0) {
+        <span class="prime-badge">Pop &ge; {{ minPopularity() }} <button type="button" (click)="clearPopularity()" aria-label="Remove"><app-icon name="x" /></button></span>
+      }
+      <button type="button" class="clear-all-btn" (click)="reset()">Reset all</button>
+    </div>
+  }
+
+
+  @if (!auth.isLoggedIn()) {
+    <div class="lock-hint-bar">
+      <app-icon name="lock" />
+      <span>Advanced filters and sorting are reserved for members. <a routerLink="/login">Sign in</a> or <a routerLink="/register">join free</a> to unlock all filters.</span>
+    </div>
+  }
+
+
+  <div class="prime-meta-bar">
+    <div class="res-count">
+      Showing <strong>{{ result()?.total ?? 0 }}</strong> titles
+    </div>
+  </div>
+
+
+  @if (loading() && !result()) {
+    <div class="grid-cards">@for (i of [1,2,3,4,5,6,7,8]; track i) { <div class="skeleton skeleton-card"></div> }</div>
+  } @else if (result()?.items?.length) {
+    <div class="grid-cards" [style.opacity]="loading() ? 0.5 : 1" style="transition:opacity .3s">
+      @for (c of result()!.items; track c.id; let i = $index) {
+        <app-dual-card [image]="c.imageUrl" [hoverImage]="c.hoverImageUrl" [title]="c.title" [subtitle]="c.synopsis"
+          [eyebrow]="c.categoryName + ' / ' + c.format" [accent]="c.accentColor" [link]="'/content/' + c.slug" [tags]="c.tags"
+          [rating]="c.averageRating" [meta]="c.releaseYear + ''" itemType="Content" [itemId]="c.id"
+          [effect]="i % 3 === 1 ? 'slide' : 'fade'" [showQuickView]="true" (quickView)="quick.set(c)" />
+      }
+    </div>
+    <app-pagination [page]="page()" [totalPages]="result()!.totalPages" (pageChange)="goPage($event)" />
+  } @else {
+    <app-empty-state icon="search" title="No matches in this corner of the multiverse" message="Try removing a filter or searching for something else.">
+      <button type="button" class="btn-fh btn-sm" (click)="reset()">Reset filters</button>
+    </app-empty-state>
+  }
+
+
+  @if (quick(); as q) {
+    <app-modal [open]="true" [title]="q.title" size="lg" (closed)="quick.set(null)">
+      <div class="qv">
+        <img [src]="q.imageUrl | asset" [alt]="q.title" />
+        <div>
+          <span class="card-eyebrow">{{ q.categoryName }} &middot; {{ q.format }} ({{ q.releaseYear }})</span>
+          <p class="mt-2">{{ q.synopsis }}</p>
+          <div class="d-flex gap-2 mt-3">
+            <a [routerLink]="'/content/' + q.slug" class="btn-fh btn-gold btn-sm" (click)="quick.set(null)">Open full title page</a>
+          </div>
+        </div>
+      </div>
+    </app-modal>
+  }
+</div>

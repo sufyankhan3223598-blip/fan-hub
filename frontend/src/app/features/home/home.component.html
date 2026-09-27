@@ -1,0 +1,207 @@
+﻿<div class="home" #root [class.no-webgl]="!webgl">
+  @if (webgl) {
+    <canvas #canvas class="webgl" aria-hidden="true"></canvas>
+    <div class="webgl-vignette" aria-hidden="true"></div>
+  } @else {
+    <div class="static-bg" aria-hidden="true"></div>
+  }
+
+
+  <nav class="chapters" aria-label="Journey progress">
+    <div class="chapter-track"><span [style.height.%]="progress() * 100"></span></div>
+    @for (c of chapters(); track c.idx) {
+      <button type="button" class="chapter" [class.active]="activeScene() === c.idx" (click)="jump(c.idx)" [attr.aria-label]="'Go to ' + c.label">
+        <i></i><span>{{ c.label }}</span>
+      </button>
+    }
+  </nav>
+
+
+  <section class="s-hero" #scene data-scene="0">
+    <div class="hero-bg-container" aria-hidden="true">
+      <video
+        #heroVideo
+        class="hero-bg-video"
+        src="/media/video/hero_section_loop.mp4"
+        autoplay
+        muted
+        loop
+        playsinline
+        webkit-playsinline
+        preload="auto"
+        disablePictureInPicture
+        [muted]="true"
+      >
+        <source src="/media/video/hero_section_loop.mp4" type="video/mp4" />
+        <source src="/video/hero_section_loop.mp4" type="video/mp4" />
+      </video>
+      <div class="hero-bg-overlay"></div>
+    </div>
+    <div class="hero-wrapper">
+
+      <div class="hero-left">
+
+        <div class="hero-badge">
+          <span class="badge-star">✦</span>
+          <span class="badge-text">YOUR FANDOM UNIVERSE</span>
+        </div>
+
+
+        <h1 class="hero-title">
+          <span class="title-white">More Than Just</span>
+          <span class="title-gradient">A Platform</span>
+        </h1>
+
+
+        <p class="hero-desc">
+          Connect, explore, and celebrate your favorite worlds. Fan Hub Plus brings together anime, games, movies, and more &mdash; all in one place.
+        </p>
+
+
+        <div class="hero-actions">
+          <button type="button" class="btn-primary-hero" (click)="jump(1)" aria-label="Start Exploring">
+            <span>Start Exploring</span>
+            <span class="btn-arrow">&rarr;</span>
+          </button>
+
+          <button type="button" class="btn-glass-hero" (click)="jump(1)" aria-label="Watch Trailer">
+            <span class="btn-play-icon">&#9655;</span>
+            <span>Watch Trailer</span>
+          </button>
+        </div>
+
+
+        <div class="hero-social">
+          <div class="avatar-group">
+            <img src="/images/avatars/avatar1.webp" alt="Fan avatar" class="avatar-thumb" />
+            <img src="/images/avatars/avatar2.webp" alt="Fan avatar" class="avatar-thumb" />
+            <img src="/images/avatars/avatar3.webp" alt="Fan avatar" class="avatar-thumb" />
+            <img src="/images/avatars/avatar4.webp" alt="Fan avatar" class="avatar-thumb" />
+          </div>
+          <div class="social-label">
+            <span>Join 1M+ Fans Worldwide</span>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="hero-right" aria-hidden="true"></div>
+    </div>
+  </section>
+
+
+  <div class="realm-gateway-divider" (click)="jump(1)" role="button" tabindex="0" (keydown.enter)="jump(1)" aria-label="Explore the 8 Realms">
+    <div class="divider-glow-bar"></div>
+    <div class="divider-content">
+      <div class="divider-line left-line"></div>
+      <div class="portal-badge">
+        <span class="portal-pulse-ring"></span>
+        <span class="portal-icon">✦</span>
+        <div class="portal-text-group">
+          <span class="portal-title">MULTIVERSE GATEWAY</span>
+          <span class="portal-subtitle">ENTER THE 8 REALMS</span>
+        </div>
+        <span class="portal-chevron">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </span>
+      </div>
+      <div class="divider-line right-line"></div>
+    </div>
+  </div>
+
+
+  @for (r of realms(); track r.id; let i = $index) {
+    <section class="s-realm" #scene [attr.data-scene]="1 + i" [style.--accent]="r.accentColor" [style.--accent-2]="r.secondaryColor"
+      [style.--realm-bg]="'url(' + (r.imageUrl | asset) + ')'" [attr.aria-label]="r.name + ' realm'">
+      <div class="realm-sticky">
+        <div class="realm-big outline-text" aria-hidden="true">{{ r.name }}</div>
+        <div class="container-fh realm-layout">
+          <div class="realm-info">
+            <span class="eyebrow">Realm {{ (i + 1).toString().padStart(2, '0') }} / 08</span>
+            <h2 class="realm-title">{{ r.name }}</h2>
+            <p class="realm-tagline">{{ r.tagline }}</p>
+            <p class="realm-desc">{{ r.description }}</p>
+            <a [routerLink]="['/realm', r.slug]" class="btn-fh btn-gold" appMagnetic><app-icon [name]="icons[r.slug] || 'sparkles'" /> Explore {{ r.name }}</a>
+            <div class="realm-cards">
+              @for (c of featured(r.slug).slice(0, 2); track c.id) {
+                <div class="realm-card">
+                  <app-dual-card aspect="wide" [image]="c.imageUrl" [hoverImage]="c.hoverImageUrl" [title]="c.title" [eyebrow]="c.format + ' / ' + c.releaseYear"
+                    [accent]="r.accentColor" [link]="'/content/' + c.slug" [rating]="c.averageRating" [tags]="c.tags" itemType="Content" [itemId]="c.id" />
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+
+
+  <section class="s-coverflow" #scene data-scene="9">
+    <div class="cover-sticky">
+      <div class="container-fh">
+        <div class="section-head">
+          <div><span class="eyebrow">Trending across the multiverse</span><h2 class="display-md">Featured right now</h2></div>
+          <div class="d-flex gap-2">
+            <button type="button" class="btn-icon" (click)="coverGo(-1)" aria-label="Previous"><app-icon name="chevron-left" /></button>
+            <button type="button" class="btn-icon" (click)="coverGo(1)" aria-label="Next"><app-icon name="chevron-right" /></button>
+          </div>
+        </div>
+      </div>
+      <div class="coverflow" (pointerdown)="coverDown($event)" (pointermove)="coverMove($event)" (pointerup)="coverUp()" (pointercancel)="coverUp()" [attr.data-cursor]="'drag'">
+        @for (c of trending(); track c.id; let i = $index) {
+          <a class="cover-item" [routerLink]="'/content/' + c.slug" [style]="coverStyle(i)" draggable="false" [style.--accent]="c.accentColor">
+            <img [src]="c.imageUrl | asset" [alt]="c.title" draggable="false" loading="lazy" />
+            <div class="cover-meta">
+              <span>{{ c.categoryName }} &middot; {{ c.releaseYear }}</span>
+              <strong>{{ c.title }}</strong>
+              <em><app-icon name="star-filled" /> {{ c.averageRating.toFixed(1) }} &middot; {{ c.viewCount | compact }} views</em>
+            </div>
+          </a>
+        }
+      </div>
+      <p class="cover-hint"><app-icon name="move" /> Scroll or drag to browse</p>
+    </div>
+  </section>
+
+
+  <section class="s-globe" #scene data-scene="10">
+    <div class="container-fh globe-layout">
+      <div class="globe-info">
+        <span class="eyebrow">Conventions &middot; meetups &middot; screenings</span>
+        <h2 class="display-md">The fandom never sleeps</h2>
+        <p class="lead">Spin the globe to discover events around the world. Hover a pin for details, click to open it on the Event Map.</p>
+        @if (data(); as d) {
+          <ul class="event-list">
+            @for (e of d.events.slice(0, 4); track e.id) {
+              <li [style.--accent]="e.accentColor">
+                <a [routerLink]="['/events', e.slug]">
+                  <span class="ev-date"><b>{{ e.startDate.slice(8, 10) }}</b>{{ month(e.startDate) }}</span>
+                  <span class="ev-text"><strong>{{ e.title }}</strong><small><app-icon name="map-pin" /> {{ e.city }}, {{ e.country }}</small></span>
+                  <app-icon name="arrow-up-right" />
+                </a>
+              </li>
+            }
+          </ul>
+        }
+        <a routerLink="/events" class="btn-fh btn-ghost"><app-icon name="map" /> Open Event Map</a>
+      </div>
+      <div class="globe-stage">
+        @if (data(); as d) { <app-globe [events]="d.events" /> } @else { <app-spinner label="Loading globe" /> }
+      </div>
+    </div>
+  </section>
+
+
+  <section class="s-sitemap section" id="sitemap">
+    <div class="container-fh">
+      <div class="section-head">
+        <div><span class="eyebrow">Navigate everything</span><h2 class="display-md">Sitemap</h2></div>
+        <p class="text-muted-fh m-0">Every page of Fan Hub Plus as a constellation. Hover a branch to trace it.</p>
+      </div>
+      <app-sitemap />
+    </div>
+  </section>
+</div>

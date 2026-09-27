@@ -1,0 +1,98 @@
+﻿
+
+@font-face { font-family: 'Orbitron'; src: url('/fonts/Orbitron.woff') format('woff'); font-weight: 400 900; font-display: swap; }
+@font-face { font-family: 'Rajdhani'; src: url('/fonts/Rajdhani-Medium.woff') format('woff'); font-weight: 500; font-display: swap; }
+@font-face { font-family: 'Rajdhani'; src: url('/fonts/Rajdhani-SemiBold.woff') format('woff'); font-weight: 600; font-display: swap; }
+@font-face { font-family: 'Rajdhani'; src: url('/fonts/Rajdhani-Bold.woff') format('woff'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'Inter'; src: url('/fonts/Inter.woff') format('woff'); font-weight: 100 900; font-display: swap; }
+
+:root {
+
+  --gold: #D4AF37;
+  --gold-2: #F5C86A;
+  --violet: #7C3AED;
+  --violet-2: #A78BFA;
+  --cyan: #22D3EE;
+  --danger: #F43F5E;
+  --success: #22C55E;
+  --warning: #F59E0B;
+
+
+  --bg-0: #07070C;
+  --bg-1: #0E0E16;
+  --bg-2: #161624;
+  --bg-3: #1E1E30;
+  --glass: rgba(255, 255, 255, 0.04);
+  --glass-strong: rgba(14, 14, 22, 0.72);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --text: #F4F4F8;
+  --text-2: #C9CAD6;
+  --muted: #8E90A6;
+  --overlay: rgba(7, 7, 12, 0.72);
+  --shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.8);
+  --glow-gold: 0 0 0 1px rgba(212, 175, 55, 0.35), 0 10px 40px -10px rgba(212, 175, 55, 0.55);
+  --glow-violet: 0 10px 40px -12px rgba(124, 58, 237, 0.6);
+  --grain-opacity: 0.04;
+
+
+  --accent: var(--gold);
+
+
+  --font-display: 'Orbitron', 'Rajdhani', system-ui, sans-serif;
+  --font-ui: 'Rajdhani', 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+
+  --r-sm: 10px;
+  --r-md: 16px;
+  --r-lg: 22px;
+  --r-xl: 28px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-power3: cubic-bezier(0.215, 0.61, 0.355, 1);
+  --nav-h: 76px;
+  --maxw: 1320px;
+
+  color-scheme: dark;
+}
+
+:root:not([data-theme='light']) {
+  .admin-shell, body:has(.admin-shell), [data-admin] {
+    --bg-0: #040405;
+    --bg-1: #070709;
+    --bg-2: #0b0b0e;
+    --bg-3: #111115;
+    --glass: rgba(255, 255, 255, 0.03);
+    --glass-strong: rgba(7, 7, 9, 0.95);
+    --overlay: rgba(0, 0, 0, 0.88);
+    --shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.95);
+  }
+}
+
+[data-theme='light'] {
+  --gold: #9E7412;
+  --gold-2: #B88B1E;
+  --cyan: #0284C7;
+  --violet: #7C3AED;
+  --bg-0: #F7F5F0;
+  --bg-1: #FFFFFF;
+  --bg-2: #EFECE3;
+  --bg-3: #E4E0D2;
+  --glass: rgba(255, 255, 255, 0.88);
+  --glass-strong: rgba(255, 255, 255, 0.96);
+  --border: rgba(24, 22, 18, 0.11);
+  --border-strong: rgba(158, 116, 18, 0.32);
+  --text: #0E0F16;
+  --text-2: #282A37;
+  --muted: #565A6E;
+  --overlay: rgba(247, 245, 240, 0.88);
+  --shadow: 0 20px 50px -18px rgba(25, 20, 10, 0.14);
+  --glow-gold: 0 0 0 1px rgba(158, 116, 18, 0.35), 0 10px 28px -10px rgba(158, 116, 18, 0.28);
+  --grain-opacity: 0.015;
+  color-scheme: light;
+}
+
+html { font-size: 16px; }
+html[data-font='sm'] { font-size: 14.5px; }
+html[data-font='lg'] { font-size: 18px; }

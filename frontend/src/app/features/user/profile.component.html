@@ -1,0 +1,78 @@
+<app-user-shell>
+  <div class="dash-tilt">
+    <span class="eyebrow">Your passport</span>
+    <h1 class="display-md mt-2 mb-4">Profile &amp; settings</h1>
+    <div class="row g-4">
+      <div class="col-xl-7">
+        <div class="panel mb-4">
+          <div class="panel-title"><h3>Avatar</h3></div>
+          <div class="avatar-zone">
+            <span class="avatar xl">@if (auth.user()?.avatarUrl) { <img [src]="auth.user()?.avatarUrl | asset" alt="Your avatar" /> } @else { {{ auth.user()?.fullName | initials }} }</span>
+            <div class="d-flex gap-2 flex-wrap">
+              <button type="button" class="btn-fh btn-gold btn-sm" (click)="pick()"><app-icon name="upload" /> Upload image</button>
+              @if (auth.user()?.avatarUrl) { <button type="button" class="btn-fh btn-danger btn-sm" (click)="removeAvatar()"><app-icon name="trash" /> Remove</button> }
+              <input #file type="file" accept="image/png,image/jpeg,image/webp,image/gif" hidden (change)="onFile($event)" />
+            </div>
+            <span class="field-hint w-100">Optional. JPG, PNG, WEBP or GIF - you can crop before uploading.</span>
+          </div>
+        </div>
+
+        <div class="panel mb-4">
+          <div class="panel-title"><h3>About you</h3></div>
+          <label class="field"><span class="field-label">Full name</span><input class="input-fh" [(ngModel)]="fullName" maxlength="100" /></label>
+          <label class="field"><span class="field-label">Bio</span><textarea class="textarea-fh" [(ngModel)]="bio" maxlength="500" rows="3"></textarea></label>
+          <span class="field-label d-block mb-2">Favorite fandoms</span>
+          <div class="chip-row mb-2">@for (f of fandoms(); track f) { <button type="button" class="chip active" (click)="removeFandom(f)">{{ f }} <app-icon name="x" /></button> }</div>
+          <div class="fandom-input mb-3">
+            <input class="input-fh" [(ngModel)]="newFandom" placeholder="e.g. Frieren, Elden Ring, BTS" (keydown.enter)="addFandom(); $event.preventDefault()" maxlength="100" />
+            <button type="button" class="btn-fh" (click)="addFandom()"><app-icon name="plus" /> Add</button>
+          </div>
+          <span class="field-label d-block mb-2">Categories of interest</span>
+          <div class="chip-row mb-4">
+            @for (c of cats.categories(); track c.id) {
+              <button type="button" class="chip" [class.active]="catIds().includes(c.id)" [style.--chip-color]="c.accentColor" (click)="toggleCat(c.id)"><app-icon [name]="icons[c.slug] || 'sparkles'" /> {{ c.name }}</button>
+            }
+          </div>
+          <button type="button" class="btn-fh btn-gold" (click)="saveProfile()" [disabled]="saving()"><app-icon name="check" /> {{ saving() ? 'Saving...' : 'Save profile' }}</button>
+        </div>
+      </div>
+
+      <div class="col-xl-5">
+        <div class="panel mb-4">
+          <div class="panel-title"><h3>Display preferences</h3></div>
+          <div class="pref-grid">
+            <div><span class="field-label d-block mb-2">Theme</span>
+              <div class="seg"><button type="button" [class.on]="theme.theme() === 'dark'" (click)="theme.theme.set('dark')"><app-icon name="moon" /> Dark</button><button type="button" [class.on]="theme.theme() === 'light'" (click)="theme.theme.set('light')"><app-icon name="sun" /> Light</button></div></div>
+            <div><span class="field-label d-block mb-2">Font size</span>
+              <div class="seg"><button type="button" [class.on]="theme.fontSize() === 'sm'" (click)="theme.fontSize.set('sm')">A-</button><button type="button" [class.on]="theme.fontSize() === 'md'" (click)="theme.fontSize.set('md')">A</button><button type="button" [class.on]="theme.fontSize() === 'lg'" (click)="theme.fontSize.set('lg')">A+</button></div></div>
+          </div>
+          <label class="toggle mt-4"><input type="checkbox" [checked]="theme.userReduceMotion()" (change)="theme.userReduceMotion.set(!theme.userReduceMotion())" /><span class="track"></span><span class="label">Reduce motion (static 3D scenes)</span></label>
+          <label class="toggle mt-3 d-flex"><input type="checkbox" [checked]="emailNotifications()" (change)="emailNotifications.set(!emailNotifications())" /><span class="track"></span><span class="label">Email notifications</span></label>
+          <button type="button" class="btn-fh btn-ghost mt-4" (click)="savePrefs()"><app-icon name="check" /> Save preferences</button>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title"><h3>Security</h3><span class="status" [class.approved]="auth.user()?.emailVerified" [class.pending]="!auth.user()?.emailVerified">{{ auth.user()?.emailVerified ? 'Email verified' : 'Email not verified' }}</span></div>
+          <p class="small text-muted-fh">{{ auth.user()?.email }}</p>
+          <label class="field"><span class="field-label">Current password</span><input class="input-fh" type="password" [(ngModel)]="currentPassword" autocomplete="current-password" /></label>
+          <label class="field"><span class="field-label">New password</span><input class="input-fh" type="password" [(ngModel)]="newPassword" autocomplete="new-password" /><span class="field-hint">8+ chars, upper, lower, number, symbol.</span></label>
+          <button type="button" class="btn-fh" [disabled]="!currentPassword || newPassword.length < 8" (click)="changePassword()"><app-icon name="key" /> Change password</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-modal [open]="!!cropSrc()" title="Crop your avatar" size="sm" (closed)="cropSrc.set(null)">
+    <div class="crop-wrap">
+      <div class="crop-stage" (pointerdown)="down($event)" (pointermove)="move($event)" (pointerup)="up()" (pointercancel)="up()">
+        @if (cropSrc()) { <img [src]="cropSrc()" [style]="imgStyle()" alt="Crop preview" draggable="false" /> }
+      </div>
+      <label class="w-100"><span class="field-label">Zoom</span><input class="range-fh" type="range" min="1" max="3" step="0.01" [value]="zoom()" (input)="zoom.set(+$any($event.target).value)" /></label>
+      <span class="field-hint">Drag to reposition.</span>
+    </div>
+    <div modal-foot class="modal-foot">
+      <button type="button" class="btn-fh btn-sm" (click)="cropSrc.set(null)">Cancel</button>
+      <button type="button" class="btn-fh btn-sm btn-gold" (click)="uploadCropped()"><app-icon name="upload" /> Save avatar</button>
+    </div>
+  </app-modal>
+</app-user-shell>

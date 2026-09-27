@@ -1,0 +1,60 @@
+<button type="button" class="spiderman-chat-btn" [class.open]="ui.chatOpen()" (click)="ui.chatOpen.set(!ui.chatOpen())"
+  [attr.aria-label]="ui.chatOpen() ? 'Close assistant' : 'Open Fan Hub Plus assistant'" [attr.aria-expanded]="ui.chatOpen()">
+  <img src="/images/spiderman-mask.png" class="spiderman-mask-img" alt="Spider-Man" />
+  @if (ui.chatOpen()) {
+    <span class="close-badge"><app-icon name="x" /></span>
+  }
+</button>
+
+@if (ui.chatOpen()) {
+  <section class="chat" role="dialog" aria-label="Fan Hub Plus assistant">
+    <header class="chat-head">
+      <div class="bot-id">
+        <span class="bot-avatar"><img src="/images/spiderman-mask.png" class="spiderman-avatar-img" alt="Spider-Man" /></span>
+        <div><strong>Spidey Assistant</strong><small><i></i> Online &middot; {{ auth.isLoggedIn() ? 'history saved' : 'guest mode' }}</small></div>
+      </div>
+      <div class="head-actions">
+        @if (auth.isLoggedIn()) { <a routerLink="/chat-history" class="btn-icon sm" aria-label="Chat history" title="Chat history"><app-icon name="clock" /></a> }
+        <button type="button" class="btn-icon sm" (click)="reset()" aria-label="New conversation" title="New conversation"><app-icon name="refresh" /></button>
+      </div>
+    </header>
+
+    @if (step()) {
+      <div class="onboard-progress" aria-label="Onboarding progress">
+        @for (s of [1, 2, 3, 4]; track s) { <span [class.on]="s <= (step() ?? 0)"></span> }
+        <small>Guided tour &middot; step {{ step() }} of 4</small>
+      </div>
+    }
+
+    <div class="chat-body" #scroller aria-live="polite">
+      @for (m of messages(); track $index; let last = $last) {
+        <div class="msg" [class.user]="m.from === 'user'">
+          <div class="bubble">{{ m.text }}</div>
+          @if (m.suggestions?.length) {
+            <div class="sugs">
+              @for (s of m.suggestions; track s.url) {
+                <button type="button" class="sug" (click)="open(s.url)">
+                  <img [src]="s.imageUrl | asset" alt="" />
+                  <span><strong>{{ s.title }}</strong><small>{{ s.subtitle }}</small></span>
+                </button>
+              }
+            </div>
+          }
+          @if (last && m.from === 'bot' && m.quick?.length) {
+            <div class="quick">
+              @for (q of m.quick; track q) { <button type="button" class="chip" (click)="send(q)">{{ q }}</button> }
+            </div>
+          }
+        </div>
+      }
+      @if (typing()) {
+        <div class="msg"><div class="bubble typing" aria-label="Assistant is typing"><span></span><span></span><span></span></div></div>
+      }
+    </div>
+
+    <form class="chat-input" (ngSubmit)="send()">
+      <input name="draft" [(ngModel)]="draft" placeholder="Ask about realms, events, bookmarks..." autocomplete="off" maxlength="1000" aria-label="Message" />
+      <button type="submit" class="send" [disabled]="!draft.trim() || typing()" aria-label="Send"><app-icon name="send" /></button>
+    </form>
+  </section>
+}

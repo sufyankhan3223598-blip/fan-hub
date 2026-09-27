@@ -1,0 +1,246 @@
+﻿<div class="page">
+  <div class="container-fh">
+    <app-breadcrumbs [items]="[{ label: 'Events' }]" />
+    <div class="d-flex justify-content-between align-items-end flex-wrap gap-3 mt-3 mb-4">
+      <div>
+        <span class="eyebrow">Location-aware event discovery</span>
+        <h1 class="display-lg mt-2">Events map &amp; calendar</h1>
+        <p class="lead m-0">Conventions, cosplay meetups, screenings and premieres. Use GPS to find what's near you.</p>
+      </div>
+      <a routerLink="/events/highlights" class="btn-fh btn-ghost"><app-icon name="sparkles" /> Event highlights</a>
+    </div>
+
+
+    <div class="panel toolbar">
+      <div class="toolbar-left">
+        <button type="button" class="btn-fh btn-gold-pulse" (click)="nearMe()" [disabled]="locating()">
+          <app-icon name="locate" />
+          <span>{{ locating() ? 'Locating...' : 'Near me' }}</span>
+        </button>
+
+        @if (me()) {
+          <app-admin-select
+            class="radius-select"
+            [options]="radiusOptions"
+            [value]="radius()"
+            placeholder="Distance"
+            ariaLabel="Radius"
+            (valueChange)="radius.set(+$event)" />
+          <button type="button" class="btn-fh btn-ghost-danger btn-sm" (click)="clearNear()">
+            <app-icon name="x" /> Clear location
+          </button>
+        }
+
+        <app-admin-select
+          class="city-select"
+          [options]="cityOptions()"
+          [value]="city()"
+          placeholder="All cities"
+          ariaLabel="Filter by city"
+          (valueChange)="city.set($event)" />
+      </div>
+
+      <div class="toolbar-divider"></div>
+
+      <div class="toolbar-right">
+        <div class="chip-row">
+          <button type="button" class="chip" [class.active]="!type()" (click)="type.set('')">All types</button>
+          @for (t of types; track t) { <button type="button" class="chip" [class.active]="type() === t" (click)="type.set(t)">{{ t }}</button> }
+        </div>
+
+        @if (city() || type() || me()) {
+          <button type="button" class="btn-clear-filters" (click)="resetFilters()" title="Reset all filters">
+            <app-icon name="x" /> Clear
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="events-dashboard">
+
+      <div class="events-cards-row">
+
+        <div class="cal-card panel">
+          <div class="card-head">
+            <div class="head-title">
+              <div class="gold-icon-halo">
+                <app-icon name="calendar" class="head-icon" />
+              </div>
+              <div>
+                <span class="card-subtitle">Monthly Schedule</span>
+                <h3>Events Calendar</h3>
+              </div>
+            </div>
+            <div class="month-nav">
+              <button type="button" class="btn-nav" (click)="shiftMonth(-1)" aria-label="Previous month">
+                <app-icon name="chevron-left" />
+              </button>
+              <strong class="month-label">{{ month() | date: 'MMMM yyyy' }}</strong>
+              <button type="button" class="btn-nav" (click)="shiftMonth(1)" aria-label="Next month">
+                <app-icon name="chevron-right" />
+              </button>
+            </div>
+          </div>
+
+          <div class="cal-grid" role="grid" aria-label="Event calendar">
+            @for (w of weekdays; track w) { <span class="wd">{{ w }}</span> }
+            @for (d of days(); track dayKey(d.date)) {
+              <div class="day" [class.out]="!d.inMonth" [class.has]="d.events.length > 0" [class.today]="d.today" role="gridcell">
+                <div class="dn-row">
+                  <span class="dn">{{ d.date.getDate() }}</span>
+                  @if (d.today) { <span class="today-dot" title="Today"></span> }
+                </div>
+                @for (e of d.events.slice(0, 2); track e.id) {
+                  <button type="button" class="ev-dot" [style.--accent]="e.accentColor" (click)="pick(e)" [title]="e.title">
+                    <span class="dot-beacon"></span>
+                    <span class="dot-title">{{ e.title }}</span>
+                  </button>
+                }
+                @if (d.events.length > 2) { <span class="more">+{{ d.events.length - 2 }} more</span> }
+              </div>
+            }
+          </div>
+        </div>
+
+
+        <div class="agenda-card panel">
+          <div class="card-head">
+            <div class="head-title">
+              <div class="gold-icon-halo">
+                <app-icon name="sparkles" class="head-icon" />
+              </div>
+              <div>
+                <span class="card-subtitle">Featured Highlights</span>
+                <div class="d-flex align-items-center gap-2">
+                  <h3>This Month</h3>
+                  <span class="count-badge">{{ monthEvents().length }} Events</span>
+                </div>
+              </div>
+            </div>
+            <div class="tabs-fh mini-tabs">
+              <button type="button" [class.active]="view() === 'calendar'" (click)="view.set('calendar')">This Month</button>
+              <button type="button" [class.active]="view() === 'list'" (click)="view.set('list')">All Events</button>
+            </div>
+          </div>
+
+          <div class="agenda-scroll-container">
+            @if (view() === 'calendar') {
+              <div class="agenda">
+                @for (e of monthEvents(); track e.id) {
+                  <button type="button" class="agenda-row" [class.active]="selected()?.id === e.id" (click)="pick(e)" [style.--accent]="e.accentColor">
+                    <span class="ad">
+                      <b class="ad-day">{{ e.startDate | date: 'dd' }}</b>
+                      <small class="ad-mon">{{ e.startDate | date: 'MMM' }}</small>
+                    </span>
+                    <div class="at">
+                      <strong class="event-title">{{ e.title }}</strong>
+                      <div class="event-sub-row">
+                        <span class="event-tag" [style.--tag-color]="e.accentColor">{{ e.eventType }}</span>
+                        <span class="event-loc"><app-icon name="map-pin" /> {{ e.city }}, {{ e.country }}</span>
+                      </div>
+                    </div>
+                    <span class="row-arrow-wrap">
+                      <app-icon name="arrow-right" />
+                    </span>
+                  </button>
+                } @empty {
+                  <div class="empty-notice">
+                    <div class="empty-halo"><app-icon name="calendar" /></div>
+                    <h4>No events this month</h4>
+                    <p>Try browsing the next month or switch to "All Events" view.</p>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="agenda">
+                @for (e of events(); track e.id) {
+                  <div class="agenda-row as-card" [class.active]="selected()?.id === e.id" [style.--accent]="e.accentColor" (click)="pick(e)">
+                    <span class="ad">
+                      <b class="ad-day">{{ e.startDate | date: 'dd' }}</b>
+                      <small class="ad-mon">{{ e.startDate | date: 'MMM yy' }}</small>
+                    </span>
+                    <div class="at">
+                      <strong class="event-title">{{ e.title }}</strong>
+                      <div class="event-sub-row">
+                        <span class="event-tag" [style.--tag-color]="e.accentColor">{{ e.eventType }}</span>
+                        <span class="event-loc"><app-icon name="map-pin" /> {{ e.venue }}, {{ e.city }} @if (e.distanceKm != null) { &middot; {{ e.distanceKm }} km }</span>
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                      @if (auth.isLoggedIn() && e.ticketUrl) {
+                        <a class="btn-fh btn-xs btn-gold" [href]="e.ticketUrl" target="_blank" rel="noopener" (click)="$event.stopPropagation()"><app-icon name="ticket" /> Tickets</a>
+                      } @else if (!auth.isLoggedIn()) {
+                        <a class="btn-fh btn-xs btn-ghost" routerLink="/login" (click)="$event.stopPropagation()"><app-icon name="lock" /> Tickets</a>
+                      }
+                      <span class="row-arrow-wrap"><app-icon name="arrow-right" /></span>
+                    </div>
+                  </div>
+                } @empty {
+                  <app-empty-state icon="calendar" title="No events found" message="Try another city or widen the distance." />
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+
+      <div class="events-map-section">
+        <div class="map-header">
+          <div class="d-flex align-items-center gap-3">
+            <span class="radar-ping">
+              <span class="ping-circle"></span>
+              <span class="ping-dot"></span>
+            </span>
+            <div>
+              <span class="map-eyebrow">LIVE EVENT RADAR</span>
+              <h3 class="map-heading">Global Interactive Discovery Map</h3>
+            </div>
+          </div>
+          <div class="map-legend d-flex align-items-center gap-3">
+            <span class="legend-item"><span class="legend-dot" style="background:#F5C86A"></span> Convention</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#A855F7"></span> Meetup</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#10B981"></span> Premiere</span>
+            <span class="legend-count">{{ events().length }} Pins Active</span>
+          </div>
+        </div>
+
+        <div class="map-frame">
+          <app-event-map [events]="events()" [me]="me()" [focus]="selected()" (selected)="pick($event)" />
+        </div>
+
+        @if (selected(); as s) {
+          <div class="sel-card" [style.--accent]="s.accentColor">
+            <img [src]="s.imageUrl | asset" [alt]="s.title" />
+            <div class="sel-body">
+              <div class="d-flex justify-content-between align-items-start gap-2">
+                <span class="eyebrow">{{ s.eventType }} &middot; {{ s.city }}</span>
+                <button type="button" class="btn-close-card" (click)="selected.set(null)" aria-label="Close details">
+                  <app-icon name="x" />
+                </button>
+              </div>
+              <h3>{{ s.title }}</h3>
+              <p>{{ s.description }}</p>
+              <div class="meta-row mb-3">
+                <span><app-icon name="calendar" /> {{ s.startDate | date: 'mediumDate' }} - {{ s.endDate | date: 'mediumDate' }}</span>
+                <span class="sep"></span>
+                <span><app-icon name="map-pin" /> {{ s.venue }}</span>
+                @if (s.distanceKm != null) {
+                  <span class="sep"></span>
+                  <span>{{ s.distanceKm }} km away</span>
+                }
+              </div>
+              <div class="d-flex gap-2 flex-wrap">
+                <a class="btn-fh btn-gold btn-sm" [routerLink]="['/events', s.slug]">Details</a>
+                @if (auth.isLoggedIn() && s.ticketUrl) {
+                  <a class="btn-fh btn-ghost btn-sm" [href]="s.ticketUrl" target="_blank" rel="noopener"><app-icon name="ticket" /> Tickets</a>
+                }
+                <app-bookmark-button itemType="Event" [itemId]="s.id" [title]="s.title" />
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

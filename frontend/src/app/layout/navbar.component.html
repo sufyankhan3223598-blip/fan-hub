@@ -1,0 +1,307 @@
+﻿<header class="nav" [class.scrolled]="scrolled() || mega()" [class.hidden]="hidden()" role="banner">
+  <div class="nav-inner container-fh">
+    <a routerLink="/" class="brand" aria-label="Fan Hub Plus home">
+      <app-logo [size]="38" />
+      <span class="brand-text">FAN HUB <b>PLUS</b></span>
+    </a>
+
+    <nav class="links" aria-label="Main navigation">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+      <button type="button" class="mega-trigger" [class.active]="mega()" (click)="mega.set(!mega()); menu.set('none'); $event.stopPropagation()"
+        aria-haspopup="true" [attr.aria-expanded]="mega()">Realms <app-icon name="chevron-down" /></button>
+      @for (l of links; track l.url) {
+        <a [routerLink]="l.url" routerLinkActive="active">{{ l.label }}</a>
+      }
+    </nav>
+
+    <div class="tools">
+      <button type="button" class="btn-icon search-icon-btn" (click)="toggleSearch($event)" aria-label="Search" [class.active]="searchBarOpen()" [attr.aria-expanded]="searchBarOpen()">
+        <app-icon [name]="searchBarOpen() ? 'x' : 'search'" />
+      </button>
+
+      <div class="drop display-drop">
+        <button type="button" class="btn-icon" (click)="toggleMenu('display', $event)" aria-label="Display settings" [attr.aria-expanded]="menu() === 'display'">
+          <app-icon name="sliders" />
+        </button>
+        @if (menu() === 'display') {
+          <div class="dropdown display-menu" (click)="$event.stopPropagation()">
+            <span class="dd-label">Theme</span>
+            <div class="seg theme-seg mb-3" role="group" aria-label="Color theme">
+              <button type="button" [class.on]="theme.theme() === 'dark'" (click)="theme.setTheme('dark')" aria-label="Dark mode">
+                <app-icon name="moon" /> Dark
+              </button>
+              <button type="button" [class.on]="theme.theme() === 'light'" (click)="theme.setTheme('light')" aria-label="Light mode">
+                <app-icon name="sun" /> Light
+              </button>
+            </div>
+
+            <span class="dd-label">Text size</span>
+            <div class="seg font-seg" role="group" aria-label="Font size">
+              <button type="button" [class.on]="theme.fontSize() === 'sm'" (click)="theme.fontSize.set('sm')" aria-label="Smaller text">A-</button>
+              <button type="button" [class.on]="theme.fontSize() === 'md'" (click)="theme.fontSize.set('md')" aria-label="Default text">A</button>
+              <button type="button" [class.on]="theme.fontSize() === 'lg'" (click)="theme.fontSize.set('lg')" aria-label="Larger text">A+</button>
+            </div>
+            <label class="toggle mt-3">
+              <input type="checkbox" [checked]="theme.userReduceMotion()" (change)="theme.userReduceMotion.set(!theme.userReduceMotion())" />
+              <span class="track"></span><span class="label">Reduce motion</span>
+            </label>
+          </div>
+        }
+      </div>
+
+      @if (auth.isLoggedIn()) {
+        <div class="drop">
+          <button type="button" class="btn-icon" (click)="toggleMenu('bell', $event)" aria-label="Notifications" [attr.aria-expanded]="menu() === 'bell'">
+            <app-icon name="bell" />
+            @if (notes.unread() > 0) { <span class="badge-count">{{ notes.unread() }}</span> }
+          </button>
+          @if (menu() === 'bell') {
+            <div class="dropdown bell-menu" (click)="$event.stopPropagation()">
+              <div class="dd-head"><strong>Notifications</strong>
+                @if (notes.unread()) { <button type="button" class="link-btn" (click)="notes.markAll()">Mark all read</button> }
+              </div>
+              @for (n of notes.items().slice(0, 7); track n.id) {
+                <button type="button" class="note" [class.unread]="!n.isRead" (click)="openNotification(n.id, n.url)">
+                  <span class="note-dot"></span>
+                  <span class="note-text"><strong>{{ n.title }}</strong><small>{{ n.message }}</small><em>{{ n.createdAt | timeAgo }}</em></span>
+                </button>
+              } @empty { <p class="dd-empty">You're all caught up.</p> }
+            </div>
+          }
+        </div>
+
+        <div class="drop">
+          <button type="button" class="avatar-btn" [class.active]="menu() === 'user'" (click)="toggleMenu('user', $event)" aria-label="Account menu" [attr.aria-expanded]="menu() === 'user'">
+            <span class="avatar-wrapper">
+              <span class="avatar">
+                @if (auth.user()?.avatarUrl) {
+                  <img [src]="auth.user()?.avatarUrl | asset" alt="" />
+                } @else {
+                  <span class="avatar-letters">{{ auth.user()?.fullName | initials }}</span>
+                }
+              </span>
+              <span class="status-radar online" title="Status: Online">
+                <span class="radar-ping"></span>
+                <span class="radar-dot"></span>
+              </span>
+            </span>
+          </button>
+
+          @if (menu() === 'user') {
+            <div class="dropdown user-menu" (click)="$event.stopPropagation()">
+
+              <div class="user-card-head">
+                <div class="user-card-avatar-wrap">
+                  <span class="avatar mini">
+                    @if (auth.user()?.avatarUrl) {
+                      <img [src]="auth.user()?.avatarUrl | asset" alt="" />
+                    } @else {
+                      <span class="avatar-letters">{{ auth.user()?.fullName | initials }}</span>
+                    }
+                  </span>
+                </div>
+                <div class="user-card-info">
+                  <div class="user-card-name-row">
+                    <strong class="user-name">{{ auth.user()?.fullName }}</strong>
+                  </div>
+                  <span class="user-email" [title]="auth.user()?.email">{{ auth.user()?.email }}</span>
+                  <div class="user-badge-row">
+                    @if (auth.isAdmin()) {
+                      <span class="role-pill role-admin">
+                        <app-icon name="shield" /> ADMIN ACCESS
+                      </span>
+                    } @else {
+                      <span class="role-pill role-member">
+                        <app-icon name="star" /> MEMBER
+                      </span>
+                    }
+                  </div>
+                </div>
+              </div>
+
+
+              <div class="user-menu-group">
+                <span class="group-title">WORKSPACE</span>
+                <a routerLink="/dashboard" (click)="menu.set('none')" class="menu-item">
+                  <span class="menu-item-icon"><app-icon name="dashboard" /></span>
+                  <span class="menu-item-title">Dashboard</span>
+                  <span class="menu-item-arrow"><app-icon name="chevron-right" /></span>
+                </a>
+                <a routerLink="/profile" (click)="menu.set('none')" class="menu-item">
+                  <span class="menu-item-icon"><app-icon name="user" /></span>
+                  <span class="menu-item-title">Profile & settings</span>
+                  <span class="menu-item-arrow"><app-icon name="chevron-right" /></span>
+                </a>
+              </div>
+
+
+              <div class="user-menu-group">
+                <span class="group-title">VAULT & ACTIVITY</span>
+                <a routerLink="/bookmarks" (click)="menu.set('none')" class="menu-item">
+                  <span class="menu-item-icon"><app-icon name="bookmark" /></span>
+                  <span class="menu-item-title">Bookmarks & notes</span>
+                  <span class="menu-item-arrow"><app-icon name="chevron-right" /></span>
+                </a>
+                <a routerLink="/submissions/mine" (click)="menu.set('none')" class="menu-item">
+                  <span class="menu-item-icon"><app-icon name="feather" /></span>
+                  <span class="menu-item-title">My submissions</span>
+                  <span class="menu-item-arrow"><app-icon name="chevron-right" /></span>
+                </a>
+                <a routerLink="/chat-history" (click)="menu.set('none')" class="menu-item">
+                  <span class="menu-item-icon"><app-icon name="bot" /></span>
+                  <span class="menu-item-title">Chat history</span>
+                  <span class="menu-item-arrow"><app-icon name="chevron-right" /></span>
+                </a>
+                <a routerLink="/feedback" (click)="menu.set('none')" class="menu-item">
+                  <span class="menu-item-icon"><app-icon name="message" /></span>
+                  <span class="menu-item-title">Feedback</span>
+                  <span class="menu-item-arrow"><app-icon name="chevron-right" /></span>
+                </a>
+              </div>
+
+
+              @if (auth.isAdmin()) {
+                <div class="user-menu-admin-wrap">
+                  <a routerLink="/admin" (click)="menu.set('none')" class="admin-feature-card">
+                    <span class="admin-icon-halo">
+                      <app-icon name="shield" />
+                    </span>
+                    <div class="admin-feature-content">
+                      <strong>Admin control panel</strong>
+                      <small>Full system oversight</small>
+                    </div>
+                    <span class="admin-vip-tag">PORTAL</span>
+                  </a>
+                </div>
+              }
+
+              <div class="menu-separator"></div>
+
+
+              <button type="button" class="sign-out-btn" (click)="logout()">
+                <span class="sign-out-icon"><app-icon name="logout" /></span>
+                <span class="sign-out-title">Sign out</span>
+              </button>
+            </div>
+          }
+        </div>
+      } @else {
+        <a routerLink="/login" class="btn-fh btn-sm login-btn">Login</a>
+        <a routerLink="/register" class="btn-fh btn-gold btn-sm join-btn">Join free</a>
+      }
+
+      <button type="button" class="btn-icon burger" (click)="toggleDrawer()" [attr.aria-expanded]="drawer()" aria-label="Open menu">
+        <app-icon [name]="drawer() ? 'x' : 'menu'" />
+      </button>
+    </div>
+  </div>
+
+
+  @if (searchBarOpen()) {
+    <div class="nav-search-bar" (click)="$event.stopPropagation()">
+      <div class="container-fh nav-search-inner">
+        <div class="nav-search-input-wrap">
+          <app-icon name="search" class="search-ico-prefix" />
+          <input #searchInput type="text" placeholder="Search titles, characters, events, merchandise..."
+                 [value]="searchTerm()" (input)="onSearchInput(searchInput.value)" (keydown)="onSearchKey($event)"
+                 autocomplete="off" spellcheck="false" />
+          @if (searchTerm()) {
+            <button type="button" class="clear-search-btn" (click)="clearSearch()" aria-label="Clear search">
+              <app-icon name="x" />
+            </button>
+          }
+          <button type="button" class="search-go-btn" (click)="submitSearch()">
+            Search
+          </button>
+        </div>
+
+        @if (searchTerm().trim().length >= 2) {
+          <div class="nav-search-results">
+            @if (searchLoading()) {
+              <div class="nav-search-status">
+                <span class="search-spinner"></span> Searching the multiverse...
+              </div>
+            } @else if (searchResults().length > 0) {
+              @for (r of searchResults(); track r.type + r.id) {
+                <a class="nav-search-item" [routerLink]="r.url" (click)="closeSearch()">
+                  <img [src]="r.imageUrl | asset" [alt]="r.title || 'Result'" />
+                  <div class="nav-search-info">
+                    <strong>{{ r.title || 'Untitled' }}</strong>
+                    <small>{{ r.subtitle || 'Multiverse item' }}</small>
+                  </div>
+                  <span class="nav-search-badge">{{ r.type || 'Item' }}</span>
+                </a>
+              }
+              <div class="nav-search-foot">
+                <a (click)="submitSearch()" role="button" tabindex="0">Open Full Explorer for "{{ searchTerm() }}" <app-icon name="arrow-right" /></a>
+              </div>
+            } @else {
+              <div class="nav-search-empty">
+                <app-icon name="search" />
+                <div class="empty-title">No matches found for "{{ searchTerm() }}"</div>
+                <p>No results match your search query. Please check for spelling mistakes or try searching different keywords.</p>
+                <button type="button" class="empty-suggestion" (click)="submitSearch()">
+                  Search in Full Explorer <app-icon name="arrow-right" />
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+
+  @if (mega()) {
+    <div class="mega" (click)="$event.stopPropagation()">
+      <div class="container-fh mega-grid">
+        <div class="mega-intro">
+          <span class="eyebrow">The Multiverse</span>
+          <h3>Eight realms. Infinite stories.</h3>
+          <p>Jump straight into a realm or explore everything with advanced filters.</p>
+          <a routerLink="/explore" class="btn-fh btn-ghost btn-sm">Open Explorer <app-icon name="arrow-right" /></a>
+        </div>
+        <div class="mega-realms">
+          @for (c of cats.categories(); track c.id; let i = $index) {
+            <a class="realm-tile" [routerLink]="['/realm', c.slug]" [style.--accent]="c.accentColor" [style.animation-delay.ms]="i * 45">
+              <span class="realm-icon"><app-icon [name]="icons[c.slug] || 'sparkles'" /></span>
+              <span class="realm-text"><strong>{{ c.name }}</strong><small>{{ c.tagline }}</small></span>
+              <span class="realm-count">{{ c.totalItems }}</span>
+            </a>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</header>
+
+@if (drawer()) {
+  <div class="drawer" role="dialog" aria-modal="true" aria-label="Menu">
+    <nav class="drawer-links">
+      <a routerLink="/">Home</a>
+      @for (l of links; track l.url) { <a [routerLink]="l.url">{{ l.label }}</a> }
+      <a routerLink="/merchandise/upcoming">Upcoming releases</a>
+      <a routerLink="/faq">FAQ</a>
+      <a routerLink="/about">About & sitemap</a>
+    </nav>
+    <span class="dd-label">Realms</span>
+    <div class="drawer-realms">
+      @for (c of cats.categories(); track c.id) {
+        <a [routerLink]="['/realm', c.slug]" [style.--accent]="c.accentColor"><app-icon [name]="icons[c.slug] || 'sparkles'" /> {{ c.name }}</a>
+      }
+    </div>
+    <div class="drawer-display">
+      <div class="seg font-seg">
+        <button type="button" (click)="theme.stepFont(-1)" aria-label="Smaller text">A-</button>
+        <button type="button" (click)="theme.stepFont(0)" aria-label="Default text">A</button>
+        <button type="button" (click)="theme.stepFont(1)" aria-label="Larger text">A+</button>
+      </div>
+    </div>
+    @if (!auth.isLoggedIn()) {
+      <div class="d-flex gap-2 mt-3">
+        <a routerLink="/login" class="btn-fh flex-fill">Login</a>
+        <a routerLink="/register" class="btn-fh btn-gold flex-fill">Join free</a>
+      </div>
+    }
+  </div>
+}

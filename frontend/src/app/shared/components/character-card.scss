@@ -1,0 +1,294 @@
+:host { display: block; perspective: 1200px; }
+
+.flip-card {
+  position: relative;
+  aspect-ratio: 3 / 4.45;
+  border-radius: var(--r-lg);
+  user-select: none;
+}
+.flip-inner {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.flipped .flip-inner {
+  transform: rotateY(180deg);
+}
+
+.face {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+  background: var(--bg-1);
+  box-shadow: 0 30px 60px -34px color-mix(in srgb, var(--accent) 70%, transparent);
+  box-sizing: border-box;
+}
+
+.front {
+  z-index: 2;
+  pointer-events: auto;
+  transform: rotateY(0deg);
+
+  .flipped & {
+    pointer-events: none !important;
+    opacity: 0;
+    z-index: 0 !important;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0s 0.3s;
+  }
+}
+
+.front-link {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  cursor: pointer;
+}
+
+.front img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.front::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(0deg, rgba(7, 7, 12, 0.92) 0%, transparent 55%);
+  pointer-events: none;
+}
+
+.front-info {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 3;
+  pointer-events: none;
+
+  h3 {
+    margin: 4px 0 2px;
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+
+    a {
+      color: inherit;
+      text-decoration: none;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+  }
+
+  .role {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 0.82rem;
+    font-family: var(--font-ui);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+}
+
+.card-eyebrow {
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.flip-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  background: rgba(7, 7, 12, 0.75) !important;
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 0.3s ease, background 0.3s ease;
+
+  &:hover {
+    transform: rotate(180deg) scale(1.1);
+    background: var(--accent) !important;
+    color: #07070c !important;
+  }
+}
+
+.back {
+  transform: rotateY(180deg);
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+
+  .flipped & {
+    pointer-events: auto !important;
+    opacity: 1;
+    z-index: 5 !important;
+    visibility: visible;
+    transition: opacity 0.3s ease;
+  }
+}
+
+.back-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(4px) brightness(0.35);
+  transform: scale(1.1);
+  pointer-events: none;
+}
+
+.back-content {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  padding: 14px 15px 12px;
+  display: flex;
+  flex-direction: column;
+  color: #fff;
+  pointer-events: auto;
+  box-sizing: border-box;
+  overflow: hidden;
+
+  .card-eyebrow {
+    font-size: 0.68rem;
+    line-height: 1.2;
+    margin-bottom: 2px;
+  }
+
+  h3 {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    margin: 2px 0 5px;
+    color: #fff;
+    text-transform: uppercase;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.power {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.78rem;
+  line-height: 1.28;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 8px;
+  app-icon { color: var(--accent); margin-right: 4px; vertical-align: text-top; }
+}
+
+.stats {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: auto;
+}
+
+.stat {
+  display: grid;
+  grid-template-columns: 30px 1fr 26px;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  span { color: rgba(255, 255, 255, 0.7); font-size: 0.7rem; }
+  b { text-align: right; color: #fff; font-size: 0.72rem; }
+  .bar { height: 4px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); overflow: hidden; }
+  .bar i {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--accent), #F5C86A);
+    box-shadow: 0 0 8px var(--accent);
+    transition: width 1s var(--ease-out) 0.2s;
+  }
+}
+
+.back-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-top: 6px;
+  padding-bottom: 2px;
+  position: relative;
+  z-index: 20;
+  pointer-events: auto;
+  flex-shrink: 0;
+
+  .profile-btn {
+    pointer-events: auto;
+    cursor: pointer;
+    position: relative;
+    z-index: 25;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 30px;
+    padding: 0 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+
+  app-bookmark-button {
+    pointer-events: auto;
+    cursor: pointer;
+    position: relative;
+    z-index: 25;
+    flex-shrink: 0;
+
+    ::ng-deep .btn-icon.sm {
+      width: 30px;
+      height: 30px;
+    }
+  }
+
+  .flip-back-btn {
+    margin-left: auto;
+    background: rgba(7, 7, 12, 0.75) !important;
+    color: #fff !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    cursor: pointer;
+    pointer-events: auto;
+    position: relative;
+    z-index: 25;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    transition: transform 0.3s ease, background 0.3s ease;
+
+    &:hover {
+      transform: rotate(-180deg) scale(1.08);
+      background: var(--accent) !important;
+      color: #07070c !important;
+    }
+  }
+}

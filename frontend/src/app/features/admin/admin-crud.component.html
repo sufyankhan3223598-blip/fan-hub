@@ -1,0 +1,278 @@
+﻿@if (cfg(); as c) {
+  <div [class.dash-tilt]="!embedded()">
+    @if (!embedded()) {
+      <div class="admin-head">
+        <div><span class="eyebrow"><app-icon [name]="c.icon" /> Manage</span><h1 class="display-md">{{ c.title }}</h1><p>{{ c.description }}</p></div>
+        <button type="button" class="btn-fh btn-gold" (click)="create()"><app-icon name="plus" /> New {{ c.singular }}</button>
+      </div>
+    }
+
+    <div class="panel grid-toolbar">
+      <div class="input-icon"><app-icon name="search" /><input class="input-fh" type="text" [placeholder]="'Search ' + c.title.toLowerCase()" (input)="onSearch($any($event.target).value)" autocomplete="off" [attr.aria-label]="'Search ' + c.title" /></div>
+      @for (f of c.filters; track f.key) {
+        <app-admin-select
+          [options]="filterOptions(f)"
+          [value]="filters()[f.key] ?? ''"
+          [placeholder]="f.label"
+          [ariaLabel]="f.label"
+          (valueChange)="setFilter(f.key, $event)" />
+      }
+      @if (embedded()) { <button type="button" class="btn-fh btn-gold btn-sm" (click)="create()"><app-icon name="plus" /> New {{ c.singular }}</button> }
+    </div>
+
+    <div class="panel p-2" [class.busy]="loading()">
+      @if (rows(); as rows) {
+        @if (rows.length) {
+          <div class="table-wrap"><table class="table-fh">
+            <thead><tr>
+              @for (col of c.columns; track col.key) {
+                @if (col.sort) { <th class="sortable" [class.sorted]="sort() === col.sort" (click)="sortBy(col.sort)" [attr.aria-sort]="sort() === col.sort ? (dir() === 'asc' ? 'ascending' : 'descending') : null">{{ col.label }} <app-icon [name]="sortIcon(col.sort)" /></th> }
+                @else { <th>{{ col.label }}</th> }
+              }
+              <th><span class="sr-only">Actions</span></th>
+            </tr></thead>
+            <tbody>
+              @for (r of rows; track r.id) {
+                <tr>
+                  @for (col of c.columns; track col.key) {
+                    <td>
+                      @switch (col.type) {
+                        @case ('title') {
+                          <button type="button" class="cell-title linkish" (click)="edit(r)">
+                            @if (imageOf(r); as img) { <img class="thumb" [src]="img | asset" alt="" loading="lazy" /> }
+                            <span><strong>{{ val(r, col.key) }}</strong>@if (col.sub && val(r, col.sub)) { <small class="clamp">{{ val(r, col.sub) }}</small> }</span>
+                          </button>
+                        }
+                        @case ('category') { @if (val(r, col.key)) { {{ val(r, col.key) }} } @else { <span class="text-muted-fh">-</span> } }
+                        @case ('bool') { @if (val(r, col.key)) { <app-icon name="check-circle" class="yes" /> } @else { <span class="text-muted-fh">-</span> } }
+                        @case ('published') { <span class="status" [class.published]="val(r, col.key)" [class.draft]="!val(r, col.key)">{{ val(r, col.key) ? 'Published' : 'Draft' }}</span> }
+                        @case ('date') { {{ val(r, col.key) | date: 'mediumDate' }} }
+                        @case ('number') { {{ val(r, col.key) ?? '-' }} }
+                        @case ('rating') { <app-icon name="star-filled" class="star" /> {{ val(r, col.key) | number: '1.1-1' }} }
+                        @case ('color') { <span class="swatch" [style.background]="val(r, col.key)"></span> <code>{{ val(r, col.key) }}</code> }
+                        @default { {{ val(r, col.key) }} }
+                      }
+                    </td>
+                  }
+                  <td><div class="row-actions">
+                    @if (publicUrl(r); as u) { <a class="btn-icon sm" [routerLink]="u" target="_blank" aria-label="View on site" title="View on site"><app-icon name="external" /></a> }
+                    <button type="button" class="btn-icon sm" (click)="edit(r)" aria-label="Edit" title="Edit"><app-icon name="edit" /></button>
+                    <button type="button" class="btn-icon sm" (click)="duplicate(r)" aria-label="Duplicate" title="Duplicate"><app-icon name="copy" /></button>
+                    <button type="button" class="btn-icon sm danger" (click)="toDelete.set([r.id])" aria-label="Delete" title="Delete"><app-icon name="trash" /></button>
+                  </div></td>
+                </tr>
+              }
+            </tbody>
+          </table></div>
+          <div class="grid-foot"><span>{{ rangeText() }}</span><app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="goPage($event)" /></div>
+        } @else {
+          <app-empty-state [icon]="c.icon" [title]="'No ' + c.title.toLowerCase() + ' found'" message="Adjust the search or filters, or create a new record.">
+            <button type="button" class="btn-fh btn-sm btn-gold" (click)="create()"><app-icon name="plus" /> New {{ c.singular }}</button>
+          </app-empty-state>
+        }
+      } @else { <app-spinner /> }
+    </div>
+  </div>
+
+
+  <app-modal [open]="!!editing()" [title]="(editing()?.id ? 'Edit ' : 'New ') + c.singular" size="lg" (closed)="editing.set(null)">
+    @if (editing()) {
+      <form class="crud-form" (ngSubmit)="save()" novalidate>
+        @for (f of c.fields; track f.key) {
+          <div class="ff" [class.half]="f.half" [class.invalid]="errors()[f.key]">
+            @switch (f.type) {
+              @case ('checkbox') {
+                <label class="toggle mt-2"><input type="checkbox" [(ngModel)]="form[f.key]" [name]="f.key" /><span class="track"></span><span class="label">{{ f.label }}</span></label>
+              }
+              @case ('richtext') {
+                <span class="field-label">{{ f.label }}@if (f.required) { <i>*</i> }</span>
+                <app-rich-editor [(ngModel)]="form[f.key]" [name]="f.key" [label]="f.label" />
+              }
+              @case ('textarea') {
+                <label class="field-label" [for]="'f-' + f.key">{{ f.label }}@if (f.required) { <i>*</i> }</label>
+                <textarea class="textarea-fh" [id]="'f-' + f.key" [(ngModel)]="form[f.key]" [name]="f.key" rows="3" [attr.maxlength]="f.maxLength ?? null"></textarea>
+                @if (f.maxLength) { <span class="field-hint">{{ form[f.key]?.length || 0 }}/{{ f.maxLength }}</span> }
+              }
+              @case ('select') {
+                <label class="field-label" [for]="'f-' + f.key">{{ f.label }}@if (f.required) { <i>*</i> }</label>
+                <app-admin-select
+                  [options]="fieldSelectOptions(f)"
+                  [value]="form[f.key]"
+                  [placeholder]="'Select ' + f.label"
+                  [ariaLabel]="f.label"
+                  (valueChange)="form[f.key] = $event" />
+              }
+              @case ('category') {
+                <label class="field-label" [for]="'f-' + f.key">{{ f.label }}@if (f.required) { <i>*</i> }</label>
+                <app-admin-select
+                  [options]="categoryFieldOptions()"
+                  [value]="form[f.key]"
+                  [placeholder]="'Select Realm / Category'"
+                  [ariaLabel]="f.label"
+                  (valueChange)="form[f.key] = $event" />
+              }
+              @case ('number') {
+                <label class="field-label" [for]="'f-' + f.key">{{ f.label }}@if (f.required) { <i>*</i> }</label>
+                <input class="input-fh" type="number" [id]="'f-' + f.key" [(ngModel)]="form[f.key]" [name]="f.key" [attr.min]="f.min ?? null" [attr.max]="f.max ?? null" step="any" />
+              }
+              @case ('date') {
+                <label class="field-label" [for]="'f-' + f.key">{{ f.label }}@if (f.required) { <i>*</i> }</label>
+                <input class="input-fh" type="date" [id]="'f-' + f.key" [(ngModel)]="form[f.key]" [name]="f.key" />
+              }
+              @case ('datetime') {
+                <label class="field-label" [for]="'f-' + f.key">{{ f.label }}@if (f.required) { <i>*</i> }</label>
+                <input class="input-fh" type="datetime-local" [id]="'f-' + f.key" [(ngModel)]="form[f.key]" [name]="f.key" />
+              }
+              @case ('color') {
+                <label class="field-label" [for]="'f-' + f.key">{{ f.label }}</label>
+                <div class="color-row"><input type="color" [id]="'f-' + f.key" [(ngModel)]="form[f.key]" [name]="f.key" /><input class="input-fh" [(ngModel)]="form[f.key]" [name]="f.key + '-hex'" maxlength="9" aria-label="Hex color" /></div>
+              }
+              @case ('image') {
+                <span class="field-label">{{ f.label }}@if (f.required) { <i>*</i> }</span>
+                <div class="img-field">
+                  <div class="img-prev">@if (form[f.key]) { <img [src]="form[f.key] | asset" alt="Preview" /> } @else { <app-icon name="image" /> }</div>
+                  <div class="img-ctl">
+                    <input class="input-fh" [(ngModel)]="form[f.key]" [name]="f.key" placeholder="/media/images/... or https://..." [attr.aria-label]="f.label + ' URL'" />
+                    <label class="btn-fh btn-sm"><app-icon name="upload" /> {{ uploading() === f.key ? 'Uploading...' : 'Upload' }}<input type="file" hidden accept="image/*" (change)="upload($event, f.key)" /></label>
+                  </div>
+                </div>
+              }
+              @case ('tags') {
+                <div class="multi-select-box">
+                  <div class="multi-select-head">
+                    <span class="field-label">{{ f.label }}</span>
+                    @if ((form[f.key] ?? []).length > 0) {
+                      <div class="multi-select-actions">
+                        <span class="selected-count-badge">{{ (form[f.key] ?? []).length }} selected</span>
+                        <button type="button" class="btn-clear-multi" (click)="form[f.key] = []">Clear all</button>
+                      </div>
+                    }
+                  </div>
+
+                  @if ((form[f.key] ?? []).length > 0) {
+                    <div class="active-chips-bar">
+                      @for (t of allTags(); track t.id) {
+                        @if (hasId(f.key, t.id)) {
+                          <span class="active-royal-chip" [style.--chip-color]="t.color">
+                            <span class="chip-dot" [style.background]="t.color || 'var(--gold)'"></span>
+                            <span>{{ t.name }}</span>
+                            <button type="button" class="chip-dismiss" (click)="toggleId(f.key, t.id)" aria-label="Remove tag"><app-icon name="x" /></button>
+                          </span>
+                        }
+                      }
+                    </div>
+                  }
+
+                  <div class="picker-search-container">
+                    <div class="picker-search-input">
+                      <app-icon name="search" />
+                      <input type="text" placeholder="Search tags..." [value]="tagSearch()" (input)="tagSearch.set($any($event.target).value)" />
+                      @if (tagSearch()) { <button type="button" class="clear-search-btn" (click)="tagSearch.set('')"><app-icon name="x" /></button> }
+                    </div>
+                    <div class="picker-options-grid">
+                      @for (t of filteredTags(); track t.id) {
+                        <button type="button" class="royal-option-chip" [class.selected]="hasId(f.key, t.id)" (click)="toggleId(f.key, t.id)">
+                          @if (hasId(f.key, t.id)) { <app-icon name="check" class="opt-check" /> }
+                          <span>{{ t.name }}</span>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+              @case ('genres') {
+                <div class="multi-select-box">
+                  <div class="multi-select-head">
+                    <span class="field-label">{{ f.label }}</span>
+                    @if ((form[f.key] ?? []).length > 0) {
+                      <div class="multi-select-actions">
+                        <span class="selected-count-badge">{{ (form[f.key] ?? []).length }} selected</span>
+                        <button type="button" class="btn-clear-multi" (click)="form[f.key] = []">Clear all</button>
+                      </div>
+                    }
+                  </div>
+
+                  @if ((form[f.key] ?? []).length > 0) {
+                    <div class="active-chips-bar">
+                      @for (g of allGenres(); track g.id) {
+                        @if (hasId(f.key, g.id)) {
+                          <span class="active-royal-chip">
+                            <span>{{ g.name }}</span>
+                            <button type="button" class="chip-dismiss" (click)="toggleId(f.key, g.id)" aria-label="Remove genre"><app-icon name="x" /></button>
+                          </span>
+                        }
+                      }
+                    </div>
+                  }
+
+                  <div class="picker-search-container">
+                    <div class="picker-search-input">
+                      <app-icon name="search" />
+                      <input type="text" placeholder="Search genres..." [value]="genreSearch()" (input)="genreSearch.set($any($event.target).value)" />
+                      @if (genreSearch()) { <button type="button" class="clear-search-btn" (click)="genreSearch.set('')"><app-icon name="x" /></button> }
+                    </div>
+                    <div class="picker-options-grid">
+                      @for (g of filteredGenres(); track g.id) {
+                        <button type="button" class="royal-option-chip" [class.selected]="hasId(f.key, g.id)" (click)="toggleId(f.key, g.id)">
+                          @if (hasId(f.key, g.id)) { <app-icon name="check" class="opt-check" /> }
+                          <span>{{ g.name }}</span>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+              @case ('timeline') {
+                <span class="field-label">{{ f.label }}</span>
+                @for (t of form[f.key]; track $index; let i = $index; let first = $first; let last = $last) {
+                  <div class="tl-row">
+                    <input class="input-fh" [(ngModel)]="t.dateLabel" [name]="'tl-d-' + i" placeholder="Year / date" aria-label="Date label" />
+                    <input class="input-fh" [(ngModel)]="t.title" [name]="'tl-t-' + i" placeholder="Milestone title" aria-label="Milestone title" />
+                    <textarea class="textarea-fh" [(ngModel)]="t.description" [name]="'tl-x-' + i" rows="2" placeholder="Description" aria-label="Milestone description"></textarea>
+                    <div class="tl-ctl">
+                      <button type="button" class="btn-icon sm" [disabled]="first" (click)="moveTimeline(i, -1)" aria-label="Move up"><app-icon name="chevron-up" /></button>
+                      <button type="button" class="btn-icon sm" [disabled]="last" (click)="moveTimeline(i, 1)" aria-label="Move down"><app-icon name="chevron-down" /></button>
+                      <button type="button" class="btn-icon sm" (click)="removeAt(f.key, i)" aria-label="Remove milestone"><app-icon name="trash" /></button>
+                    </div>
+                  </div>
+                }
+                <button type="button" class="btn-fh btn-sm" (click)="addTimeline()"><app-icon name="plus" /> Add milestone</button>
+              }
+              @case ('gallery') {
+                <span class="field-label">{{ f.label }}</span>
+                <div class="gallery">
+                  @for (g of form[f.key]; track $index; let i = $index) {
+                    <div class="g-item">
+                      @if (g) { <img [src]="g | asset" alt="" /> } @else { <div class="g-empty"><app-icon name="image" /></div> }
+                      <input class="input-fh" [ngModel]="g" (ngModelChange)="setGallery(i, $event)" [name]="'g-' + i" placeholder="Image URL" aria-label="Gallery image URL" />
+                      <button type="button" class="btn-icon sm" (click)="removeAt(f.key, i)" aria-label="Remove image"><app-icon name="trash" /></button>
+                    </div>
+                  }
+                </div>
+                <div class="d-flex gap-2 mt-2">
+                  <button type="button" class="btn-fh btn-sm" (click)="addGallery()"><app-icon name="link" /> Add URL</button>
+                  <label class="btn-fh btn-sm"><app-icon name="upload" /> {{ uploading() === f.key ? 'Uploading...' : 'Upload image' }}<input type="file" hidden accept="image/*" (change)="upload($event, f.key, true)" /></label>
+                </div>
+              }
+              @default {
+                <label class="field-label" [for]="'f-' + f.key">{{ f.label }}@if (f.required) { <i>*</i> }</label>
+                <input class="input-fh" [type]="f.type === 'url' ? 'url' : 'text'" [id]="'f-' + f.key" [(ngModel)]="form[f.key]" [name]="f.key" [attr.maxlength]="f.maxLength ?? null" [placeholder]="f.placeholder ?? ''" />
+              }
+            }
+            @if (errors()[f.key]; as err) { <span class="field-error">{{ err }}</span> }
+            @else if (f.hint) { <span class="field-hint">{{ f.hint }}</span> }
+          </div>
+        }
+        <button type="submit" hidden></button>
+      </form>
+    }
+    <div modal-foot class="modal-foot">
+      <button type="button" class="btn-fh btn-sm" (click)="editing.set(null)">Cancel</button>
+      <button type="button" class="btn-fh btn-sm btn-gold" [disabled]="saving()" (click)="save()"><app-icon name="check" /> {{ saving() ? 'Saving...' : (editing()?.id ? 'Save changes' : 'Create') }}</button>
+    </div>
+  </app-modal>
+
+  <app-confirm [open]="!!toDelete()" [title]="'Delete ' + (toDelete()?.length ?? 0) + ' ' + c.singular + '(s)?'" message="This permanently removes the record(s) and related bookmarks or ratings. This cannot be undone." confirmText="Delete" (confirm)="remove()" (cancel)="toDelete.set(null)" />
+} @else {
+  <app-empty-state icon="alert" title="Unknown module" message="This management section does not exist."><a routerLink="/admin" class="btn-fh btn-sm">Back to overview</a></app-empty-state>
+}

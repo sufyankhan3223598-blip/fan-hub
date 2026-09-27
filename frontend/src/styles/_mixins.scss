@@ -1,0 +1,73 @@
+﻿
+
+$bp-sm: 576px;
+$bp-md: 768px;
+$bp-lg: 992px;
+$bp-xl: 1200px;
+
+@mixin up($bp) { @media (min-width: $bp) { @content; } }
+@mixin down($bp) { @media (max-width: ($bp - 0.02px)) { @content; } }
+
+@mixin glass($blur: 16px) {
+  background: var(--glass);
+  backdrop-filter: blur($blur) saturate(140%);
+  -webkit-backdrop-filter: blur($blur) saturate(140%);
+  border: 1px solid var(--border);
+}
+
+@mixin panel {
+  @include glass;
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow);
+}
+
+@mixin display($size: 2.5rem) {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: $size;
+  letter-spacing: 0.02em;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+@mixin eyebrow {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+@mixin gradient-border($c1: var(--gold), $c2: var(--violet), $radius: var(--r-md)) {
+  position: relative;
+  border-radius: $radius;
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, $c1, transparent 40%, transparent 60%, $c2);
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+}
+
+@mixin focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 3px;
+  }
+}
+
+@mixin line-clamp($lines) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@mixin reduced-motion { @media (prefers-reduced-motion: reduce) { @content; } }

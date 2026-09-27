@@ -1,0 +1,105 @@
+﻿@use 'mixins' as *;
+
+.btn-fh {
+  --btn-bg: var(--bg-2);
+  --btn-fg: var(--text);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 24px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 0.98rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  isolation: isolate;
+  cursor: pointer;
+  transition: transform 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out), background 0.3s, color 0.3s, border-color 0.3s;
+  @include focus-ring;
+
+  svg { width: 18px; height: 18px; flex: none; }
+  &:hover { color: var(--btn-fg); transform: translateY(-2px); border-color: var(--gold); }
+  &:active { transform: translateY(0) scale(0.98); }
+  &[disabled], &.disabled { opacity: 0.5; pointer-events: none; }
+
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -120%;
+    width: 60%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+    transform: skewX(-20deg);
+    z-index: -1;
+    transition: left 0.8s var(--ease-out);
+  }
+  &:hover::after { left: 140%; }
+}
+
+.btn-gold {
+  --btn-bg: linear-gradient(135deg, #F5C86A 0%, #D4AF37 45%, #9B7A1C 100%);
+  --btn-fg: #0B0A06;
+  border-color: rgba(245, 200, 106, 0.6);
+  box-shadow: var(--glow-gold);
+  &:hover { box-shadow: 0 0 0 1px rgba(245, 200, 106, 0.7), 0 16px 50px -8px rgba(212, 175, 55, 0.75); }
+}
+
+.btn-violet {
+  --btn-bg: linear-gradient(135deg, #8B5CF6, #6D28D9);
+  --btn-fg: #fff;
+  border-color: rgba(167, 139, 250, 0.5);
+  box-shadow: var(--glow-violet);
+}
+
+.btn-ghost {
+  --btn-bg: var(--glass);
+  @include gradient-border(var(--gold-2), var(--cyan), 999px);
+  border-color: transparent;
+  backdrop-filter: blur(10px);
+  &:hover { --btn-bg: rgba(212, 175, 55, 0.08); }
+}
+
+.btn-danger { --btn-bg: rgba(244, 63, 94, 0.12); --btn-fg: #fb7185; border-color: rgba(244, 63, 94, 0.4); &:hover { border-color: var(--danger); } }
+.btn-sm { height: 38px; padding: 0 16px; font-size: 0.85rem; }
+.btn-lg { height: 58px; padding: 0 34px; font-size: 1.05rem; }
+.btn-block { width: 100%; }
+
+.btn-icon {
+  width: 44px; height: 44px; padding: 0; border-radius: 50%;
+  display: inline-grid; place-items: center;
+  background: var(--glass); border: 1px solid var(--border); color: var(--text);
+  cursor: pointer; transition: all 0.3s var(--ease-out); position: relative;
+  svg { width: 19px; height: 19px; }
+  &:hover { border-color: var(--gold); color: var(--gold-2); transform: translateY(-2px); box-shadow: var(--glow-gold); }
+  &.active { background: var(--gold); color: #0B0A06; border-color: var(--gold); }
+  &.sm { width: 36px; height: 36px; svg { width: 16px; height: 16px; } }
+  @include focus-ring;
+}
+
+.btn-play {
+  width: 64px; height: 64px; border-radius: 50%; border: none; cursor: pointer;
+  display: grid; place-items: center; color: #0B0A06;
+  background: radial-gradient(circle at 30% 30%, #fff5d6, var(--gold-2) 40%, var(--gold));
+  box-shadow: 0 0 0 8px rgba(212, 175, 55, 0.14), 0 12px 40px -6px rgba(212, 175, 55, 0.7);
+  transition: transform 0.4s var(--ease-out), box-shadow 0.4s;
+  svg { width: 24px; height: 24px; margin-left: 3px; }
+  &:hover { transform: scale(1.08); box-shadow: 0 0 0 14px rgba(212, 175, 55, 0.12), 0 16px 50px -6px rgba(212, 175, 55, 0.8); }
+  @include focus-ring;
+}
+
+.link-arrow {
+  display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-ui); font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase; font-size: 0.85rem; color: var(--accent);
+  svg { width: 16px; height: 16px; transition: transform 0.3s var(--ease-out); }
+  &:hover { color: var(--text); svg { transform: translateX(5px); } }
+}

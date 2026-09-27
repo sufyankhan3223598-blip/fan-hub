@@ -1,0 +1,118 @@
+﻿@if (item(); as c) {
+  <div [style.--accent]="c.accentColor">
+
+    <section class="cine-hero">
+      <div class="cine-bg"><img [src]="c.bannerUrl | asset" [alt]="c.title" /></div>
+      <div class="container-fh">
+        <div class="cine-content">
+          <app-breadcrumbs [items]="[{ label: c.categoryName, url: '/realm/' + c.categorySlug }, { label: c.title }]" />
+          <h1 class="cine-title">{{ c.title }}</h1>
+          <div class="meta-row">
+            <span>{{ c.releaseYear }}</span>
+            @if (c.seasons) { <span class="sep"></span><span>{{ c.seasons }} season{{ c.seasons > 1 ? 's' : '' }}</span> }
+            @if (c.episodes) { <span class="sep"></span><span>{{ c.episodes }} {{ c.format === 'Album' || c.format === 'EP' ? 'tracks' : c.format === 'Series' ? 'episodes' : 'issues' }}</span> }
+            <span class="pill">{{ c.categoryName }}</span>
+            <span class="pill">{{ c.contentType }}</span>
+            <span class="stars"><app-icon name="star-filled" /> {{ c.averageRating.toFixed(1) }} <small class="text-muted-fh">({{ c.ratingCount }})</small></span>
+            <span><app-icon name="eye" /> {{ c.viewCount | compact }}</span>
+          </div>
+          <p class="cine-synopsis">{{ c.synopsis }}</p>
+          <div class="chip-row mb-4">@for (g of c.genres; track g) { <span class="chip">{{ g }}</span> } @for (t of c.tags; track t.id) { <span class="tag-badge" [style.--tag-color]="t.color">{{ t.name }}</span> }</div>
+          <div class="cine-actions">
+            <button type="button" class="btn-play" (click)="trailer.set(true)" aria-label="Play trailer" data-cursor="play"><app-icon name="play" /></button>
+            <app-bookmark-button itemType="Content" [itemId]="c.id" [title]="c.title" />
+            <button type="button" class="btn-icon" (click)="scrollTabs()" aria-label="More info"><app-icon name="info" /></button>
+            <app-share [title]="c.title" [path]="'/content/' + c.slug" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <section class="container-fh pb-5" id="tabs">
+      <div class="tabs-fh" role="tablist">
+        <button type="button" role="tab" [class.active]="tab() === 'overview'" (click)="tab.set('overview')">Overview</button>
+        <button type="button" role="tab" [class.active]="tab() === 'media'" (click)="tab.set('media')">Media ({{ c.media.length }})</button>
+        <button type="button" role="tab" [class.active]="tab() === 'characters'" (click)="tab.set('characters')">Characters ({{ c.characters.length }})</button>
+        <button type="button" role="tab" [class.active]="tab() === 'related'" (click)="tab.set('related')">Related</button>
+      </div>
+
+      @switch (tab()) {
+        @case ('overview') {
+          <div class="tab-panel row g-4">
+            <div class="col-lg-8">
+              <div class="rich-text" [innerHTML]="c.description | richAssets"></div>
+              @if (c.locked) {
+                <app-locked title="Unlock the full story" [returnUrl]="'/content/' + c.slug" />
+              }
+              <div class="facts">
+                <div class="fact"><span>Creator / Studio</span><strong>{{ c.creator }}</strong></div>
+                <div class="fact"><span>Format</span><strong>{{ c.format }}</strong></div>
+                <div class="fact"><span>Released</span><strong>{{ c.releaseYear }}</strong></div>
+                <div class="fact"><span>Popularity</span><strong>{{ c.popularityScore }}</strong></div>
+              </div>
+              <div class="panel rate-panel">
+                <div class="panel-title"><h3>Rate this title</h3><span class="sub">5 stars and thumbs up / down</span></div>
+                <app-rating itemType="Content" [itemId]="c.id" />
+              </div>
+            </div>
+            <div class="col-lg-4 d-flex flex-column align-items-center gap-3">
+              <img class="detail-poster" [src]="c.imageUrl | asset" [alt]="c.title + ' poster'" />
+              <app-bookmark-button itemType="Content" [itemId]="c.id" [title]="c.title" variant="full" />
+            </div>
+          </div>
+        }
+        @case ('media') {
+          <div class="tab-panel">
+            @if (c.locked) { <app-locked title="Media playback is for members" [returnUrl]="'/content/' + c.slug" /> }
+            <div class="grid-cards wide mt-4">
+              @for (m of c.media; track m.id) {
+                <app-dual-card [image]="m.imageUrl" [hoverImage]="m.hoverImageUrl" [title]="m.title" [subtitle]="m.description" [eyebrow]="m.mediaType"
+                  [accent]="c.accentColor" [link]="'/media/' + m.id" aspect="wide" [locked]="m.locked" itemType="Media" [itemId]="m.id" [views]="m.viewCount" />
+              }
+            </div>
+          </div>
+        }
+        @case ('characters') {
+          <div class="tab-panel">
+            <div class="grid-cards">
+              @for (ch of c.characters; track ch.id) { <app-character-card [c]="ch" /> }
+              @empty { <p class="text-muted-fh">No character profiles for this title yet.</p> }
+            </div>
+          </div>
+        }
+        @case ('related') {
+          <div class="tab-panel">
+            <div class="row-scroll">
+              @for (r of c.related; track r.id) {
+                <div class="ep-card">
+                  <app-dual-card [image]="r.imageUrl" [hoverImage]="r.hoverImageUrl" [title]="r.title" [eyebrow]="r.categoryName + ' / ' + r.releaseYear"
+                    [accent]="r.accentColor" [link]="'/content/' + r.slug" [rating]="r.averageRating" itemType="Content" [itemId]="r.id" />
+                  <div class="progress-fh" [attr.aria-label]="'Popularity ' + r.popularityScore" title="Popularity"><span [style.width.%]="r.popularityScore / 10"></span></div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      }
+    </section>
+
+    <app-modal [open]="trailer()" [title]="c.title + ' - trailer'" size="lg" (closed)="trailer.set(false)">
+      @if (c.locked) {
+        <app-locked title="Trailers are for members" [returnUrl]="'/content/' + c.slug" />
+      } @else if (c.trailerUrl) {
+        <app-video-player [url]="c.trailerUrl" [posterUrl]="c.bannerUrl" [title]="c.title" [autoplay]="true" />
+      } @else if (c.media.length && !isAudio(c.media[0])) {
+        <app-video-player [url]="c.media[0].url ?? ''" [embedType]="c.media[0].embedType" [posterUrl]="c.media[0].imageUrl" [title]="c.media[0].title" [autoplay]="true" />
+      } @else if (c.media.length) {
+        <app-audio-player [url]="c.media[0].url ?? ''" [title]="c.media[0].title" [accent]="c.accentColor" />
+      } @else {
+        <p>No trailer available yet.</p>
+      }
+    </app-modal>
+  </div>
+} @else if (error()) {
+  <div class="page container-fh"><h2>Content not found</h2><a routerLink="/explore" class="btn-fh">Back to Explorer</a></div>
+} @else {
+  <div class="page container-fh"><div class="skeleton" style="height:70vh"></div></div>
+}
