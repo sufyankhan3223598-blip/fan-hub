@@ -1,4 +1,4 @@
-﻿using FanHubPlus.Api.Common;
+using FanHubPlus.Api.Common;
 using FanHubPlus.Api.DTOs;
 using FanHubPlus.Api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -117,6 +117,15 @@ public class AdminController : ControllerBase
     public async Task<ActionResult<object>> Upload(IFormFile file, [FromQuery] string folder = "content")
     {
         var url = await _files.SaveImageAsync(file, folder);
+        return Ok(new { url });
+    }
+
+    [HttpPost("upload-media")]
+    [RequestSizeLimit(200 * 1024 * 1024)]
+    [RequestFormLimits(MultipartBodyLengthLimit = 200 * 1024 * 1024)]
+    public async Task<ActionResult<object>> UploadMedia(IFormFile file, [FromQuery] string folder = "media")
+    {
+        var url = await _files.SaveMediaAsync(file, folder);
         return Ok(new { url });
     }
 }

@@ -1,4 +1,4 @@
-﻿@if (cfg(); as c) {
+@if (cfg(); as c) {
   <div [class.dash-tilt]="!embedded()">
     @if (!embedded()) {
       <div class="admin-head">
@@ -126,6 +126,18 @@
               @case ('color') {
                 <label class="field-label" [for]="'f-' + f.key">{{ f.label }}</label>
                 <div class="color-row"><input type="color" [id]="'f-' + f.key" [(ngModel)]="form[f.key]" [name]="f.key" /><input class="input-fh" [(ngModel)]="form[f.key]" [name]="f.key + '-hex'" maxlength="9" aria-label="Hex color" /></div>
+              }
+              @case ('media-url') {
+                <label class="field-label" [for]="'f-' + f.key">{{ f.label }}@if (f.required) { <i>*</i> }</label>
+                <div class="media-url-row">
+                  <input class="input-fh" type="text" [id]="'f-' + f.key" [(ngModel)]="form[f.key]" [name]="f.key"
+                    placeholder="Paste link (YouTube, MP4, etc.) or upload from PC" [attr.aria-label]="f.label" />
+                  <label class="btn-fh btn-sm btn-gold">
+                    <app-icon [name]="uploading() === f.key ? 'clock' : 'upload'" />
+                    {{ uploading() === f.key ? 'Uploading...' : 'Upload from PC' }}
+                    <input type="file" hidden accept="video/*,audio/*,.mp4,.webm,.mkv,.mov,.mp3,.wav,.m4a" (change)="uploadMedia($event, f.key)" />
+                  </label>
+                </div>
               }
               @case ('image') {
                 <span class="field-label">{{ f.label }}@if (f.required) { <i>*</i> }</span>

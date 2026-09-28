@@ -1,4 +1,4 @@
-﻿import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, NgZone, OnDestroy, OnInit, computed, effect, inject, signal, viewChild, viewChildren } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, NgZone, OnDestroy, OnInit, computed, effect, inject, signal, viewChild, viewChildren } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -93,16 +93,20 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
     this.zone.runOutsideAngular(() => {
       const canvas = this.canvas()?.nativeElement;
       if (this.webgl && canvas) {
-        this.scene = new HomeScene(canvas, { lowPower: this.theme.isMobile() || (navigator.hardwareConcurrency ?? 8) <= 4 });
-        this.scene.onReady = () => this.zone.run(() => this.sceneReady.set(true));
-        this.scene.start();
-        const onResize = () => { this.scene?.resize(); ScrollTrigger.refresh(); };
-        const onMouse = (e: PointerEvent) => this.scene?.setMouse((e.clientX / innerWidth) * 2 - 1, -((e.clientY / innerHeight) * 2 - 1));
-        const onVisibility = () => (document.hidden ? this.scene?.stop() : this.scene?.start());
-        window.addEventListener('resize', onResize);
-        window.addEventListener('pointermove', onMouse, { passive: true });
-        document.addEventListener('visibilitychange', onVisibility);
-        this.cleanup.push(() => window.removeEventListener('resize', onResize), () => window.removeEventListener('pointermove', onMouse), () => document.removeEventListener('visibilitychange', onVisibility));
+        try {
+          this.scene = new HomeScene(canvas, { lowPower: this.theme.isMobile() || (navigator.hardwareConcurrency ?? 8) <= 4 });
+          this.scene.onReady = () => this.zone.run(() => this.sceneReady.set(true));
+          this.scene.start();
+          const onResize = () => { this.scene?.resize(); ScrollTrigger.refresh(); };
+          const onMouse = (e: PointerEvent) => this.scene?.setMouse((e.clientX / innerWidth) * 2 - 1, -((e.clientY / innerHeight) * 2 - 1));
+          const onVisibility = () => (document.hidden ? this.scene?.stop() : this.scene?.start());
+          window.addEventListener('resize', onResize);
+          window.addEventListener('pointermove', onMouse, { passive: true });
+          document.addEventListener('visibilitychange', onVisibility);
+          this.cleanup.push(() => window.removeEventListener('resize', onResize), () => window.removeEventListener('pointermove', onMouse), () => document.removeEventListener('visibilitychange', onVisibility));
+        } catch (err) {
+          console.warn('WebGL HomeScene failed to initialize, falling back:', err);
+        }
       }
 
 

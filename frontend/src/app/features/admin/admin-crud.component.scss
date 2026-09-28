@@ -1,4 +1,4 @@
-﻿:host { display: block; }
+:host { display: block; }
 .busy { opacity: 0.6; transition: opacity 0.2s; }
 .linkish { background: none; border: none; padding: 0; text-align: left; cursor: pointer; color: inherit; }
 .clamp { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; max-width: 320px; }
@@ -31,6 +31,11 @@ code { font-size: 0.8rem; color: #8e95a5; font-family: monospace; }
     background: rgba(14, 15, 23, 0.6); padding: 4px; cursor: pointer; transition: border-color 0.2s;
     &:hover { border-color: #e6b85c; }
   }
+}
+.media-url-row {
+  display: flex; gap: 12px; align-items: center;
+  .input-fh { flex: 1; min-width: 0; }
+  label { flex: none; white-space: nowrap; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
 }
 .img-field { display: flex; gap: 14px; align-items: stretch; }
 .img-prev {

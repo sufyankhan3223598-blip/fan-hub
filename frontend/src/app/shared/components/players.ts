@@ -41,7 +41,7 @@ import { DurationPipe, assetUrl } from '../../core/pipes/pipes';
     .seek { flex: 1; accent-color: #D4AF37; }
   `]
 })
-export class VideoPlayerComponent {
+export class VideoPlayerComponent implements OnDestroy {
   private sanitizer = inject(DomSanitizer);
   readonly url = input<string>('');
   readonly posterUrl = input<string>('');
@@ -59,7 +59,6 @@ export class VideoPlayerComponent {
   readonly src = computed(() => assetUrl(this.url()));
   readonly poster = computed(() => assetUrl(this.posterUrl()));
   readonly ytUrl = computed<SafeResourceUrl>(() => {
-
     const u = this.url().replace('https://www.youtube.com/watch?v=', 'https://www.youtube-nocookie.com/embed/');
     const safe = /^https:\/\/www\.youtube(-nocookie)?\.com\/embed\/[\w-]+$/.test(u) ? u : 'about:blank';
     return this.sanitizer.bypassSecurityTrustResourceUrl(safe + (this.autoplay() && safe !== 'about:blank' ? '?autoplay=1' : ''));
@@ -67,12 +66,44 @@ export class VideoPlayerComponent {
 
   constructor() {
     effect(() => {
+      this.url();
       const v = this.video()?.nativeElement;
-      if (v && this.autoplay()) v.play().catch(() => undefined);
+      if (v) {
+        v.pause();
+        v.currentTime = 0;
+        if (this.autoplay()) {
+          document.querySelectorAll<HTMLMediaElement>('audio, video').forEach(el => {
+            if (el !== v && !el.paused) el.pause();
+          });
+          v.play().catch(() => undefined);
+        }
+      }
     });
   }
 
-  toggle(): void { const v = this.video()?.nativeElement; if (!v) return; v.paused ? v.play() : v.pause(); }
+  ngOnDestroy(): void {
+    const v = this.video()?.nativeElement;
+    if (v) {
+      try {
+        v.pause();
+        v.currentTime = 0;
+        v.src = '';
+      } catch {}
+    }
+  }
+
+  toggle(): void {
+    const v = this.video()?.nativeElement;
+    if (!v) return;
+    if (v.paused) {
+      document.querySelectorAll<HTMLMediaElement>('audio, video').forEach(el => {
+        if (el !== v && !el.paused) el.pause();
+      });
+      v.play().catch(() => undefined);
+    } else {
+      v.pause();
+    }
+  }
   onTime(): void { this.current.set(this.video()?.nativeElement.currentTime ?? 0); }
   onMeta(): void { this.duration.set(this.video()?.nativeElement.duration ?? 0); }
   seek(e: Event): void { const v = this.video()?.nativeElement; if (v) v.currentTime = +(e.target as HTMLInputElement).value; }
@@ -164,7 +195,30 @@ export class AudioPlayerComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  toggle(): void { const a = this.audio().nativeElement; a.paused ? a.play() : a.pause(); }
+  constructor() {
+    effect(() => {
+      this.url();
+      const a = this.audio()?.nativeElement;
+      if (a) {
+        a.pause();
+        a.currentTime = 0;
+        this.playing.set(false);
+        this.current.set(0);
+      }
+    });
+  }
+
+  toggle(): void {
+    const a = this.audio().nativeElement;
+    if (a.paused) {
+      document.querySelectorAll<HTMLMediaElement>('audio, video').forEach(el => {
+        if (el !== a && !el.paused) el.pause();
+      });
+      a.play().catch(() => undefined);
+    } else {
+      a.pause();
+    }
+  }
   onTime(): void { this.current.set(this.audio().nativeElement.currentTime); this.draw(); }
   onMeta(): void { this.duration.set(this.audio().nativeElement.duration); this.draw(); }
   seekTo(e: MouseEvent): void {
@@ -173,5 +227,26 @@ export class AudioPlayerComponent implements AfterViewInit, OnDestroy {
     const a = this.audio().nativeElement;
     if (a.duration) a.currentTime = ((e.clientX - r.left) / r.width) * a.duration;
   }
-  ngOnDestroy(): void { this.ro?.disconnect(); this.audio().nativeElement.pause(); }
+  ngOnDestroy(): void {
+    this.ro?.disconnect();
+    const a = this.audio()?.nativeElement;
+    if (a) {
+      try {
+        a.pause();
+        a.currentTime = 0;
+        a.src = '';
+      } catch {}
+    }
+  }
+}
+
+if (typeof document !== 'undefined') {
+  document.addEventListener('play', (e: Event) => {
+    const target = e.target as HTMLMediaElement;
+    if (target && (target.tagName === 'AUDIO' || target.tagName === 'VIDEO')) {
+      document.querySelectorAll<HTMLMediaElement>('audio, video').forEach(el => {
+        if (el !== target && !el.paused) el.pause();
+      });
+    }
+  }, true);
 }

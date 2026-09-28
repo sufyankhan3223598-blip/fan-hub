@@ -237,6 +237,7 @@ public class OtpService : IOtpService
 public interface IFileStorageService
 {
     Task<string> SaveImageAsync(IFormFile file, string folder);
+    Task<string> SaveMediaAsync(IFormFile file, string folder);
 }
 
 public class FileStorageService : IFileStorageService
@@ -262,6 +263,24 @@ public class FileStorageService : IFileStorageService
             var read = await peek.ReadAsync(header.AsMemory(0, 12));
             if (read < 4 || !LooksLikeImage(header)) throw new AppException("The uploaded file is not a valid image.");
         }
+
+        var root = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
+        var dir = Path.Combine(root, "uploads", Slug.Create(folder));
+        Directory.CreateDirectory(dir);
+        var name = $"{Guid.NewGuid():N}{ext}";
+        await using var stream = File.Create(Path.Combine(dir, name));
+        await file.CopyToAsync(stream);
+        return $"/uploads/{Slug.Create(folder)}/{name}";
+    }
+
+    public async Task<string> SaveMediaAsync(IFormFile file, string folder)
+    {
+        if (file.Length == 0) throw new AppException("The file is empty.");
+        if (file.Length > 200L * 1024 * 1024) throw new AppException("Media file must be 200 MB or smaller.");
+        var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+        var allowedMedia = new[] { ".mp4", ".webm", ".mkv", ".mov", ".avi", ".mp3", ".wav", ".m4a", ".ogg", ".aac", ".flac", ".jpg", ".jpeg", ".png", ".webp" };
+        if (!allowedMedia.Contains(ext))
+            throw new AppException("Invalid media format. Supported formats: MP4, WebM, MKV, MOV, MP3, WAV, M4A, OGG.");
 
         var root = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
         var dir = Path.Combine(root, "uploads", Slug.Create(folder));

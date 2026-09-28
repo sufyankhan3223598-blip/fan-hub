@@ -1,4 +1,4 @@
-﻿import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -224,6 +224,26 @@ export class AdminCrudComponent extends AdminGrid<Row> {
     this.api.adminUpload(file, this.resource()).subscribe({
       next: r => { if (gallery) this.addGallery(r.url); else this.form[key] = r.url; this.uploading.set(null); this.toast.success('Image uploaded'); },
       error: () => this.uploading.set(null)
+    });
+  }
+
+  uploadMedia(e: Event, key: string): void {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+    if (!file) return;
+    this.uploading.set(key);
+    this.toast.info('Uploading media...', `Uploading ${file.name}...`);
+    this.api.adminUploadMedia(file, 'media').subscribe({
+      next: r => {
+        this.form[key] = r.url;
+        this.uploading.set(null);
+        this.toast.success('Media uploaded', 'File uploaded! Media URL set.');
+      },
+      error: err => {
+        this.uploading.set(null);
+        this.toast.error('Upload failed', err.error?.message || 'Could not upload media file.');
+      }
     });
   }
 

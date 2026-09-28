@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Mask 3D gradient -->
+    <radialGradient id="spideyRed" cx="45%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#FF3333" />
+      <stop offset="55%" stop-color="#DE1B1B" />
+      <stop offset="90%" stop-color="#A50A0A" />
+      <stop offset="100%" stop-color="#720404" />
+    </radialGradient>
+
+    <!-- Eye Lens Gradient -->
+    <linearGradient id="lensGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="65%" stop-color="#F1F5F9" />
+      <stop offset="100%" stop-color="#CBD5E1" />
+    </linearGradient>
+
+    <!-- Glow & Shadow -->
+    <filter id="eyeGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity="0.65" />
+    </filter>
+    <filter id="maskShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
+  </defs>
+
+  <g filter="url(#maskShadow)">
+    <!-- Head Outline / Face Shape -->
+    <path d="M 256,28 C 380,28 448,136 448,256 C 448,376 364,484 256,488 C 148,484 64,376 64,256 C 64,136 132,28 256,28 Z" fill="url(#spideyRed)" />
+
+    <!-- Web Lines Pattern -->
+    <g stroke="#161214" stroke-width="4.5" stroke-linecap="round" fill="none" opacity="0.88">
+      <!-- Radiating vertical / diagonal web spines from center nose bridge (256, 260) -->
+      <line x1="256" y1="260" x2="256" y2="28" />
+      <line x1="256" y1="260" x2="256" y2="488" />
+      <line x1="256" y1="260" x2="190" y2="34" />
+      <line x1="256" y1="260" x2="322" y2="34" />
+      <line x1="256" y1="260" x2="128" y2="58" />
+      <line x1="256" y1="260" x2="384" y2="58" />
+      <line x1="256" y1="260" x2="80" y2="120" />
+      <line x1="256" y1="260" x2="432" y2="120" />
+      <line x1="256" y1="260" x2="65" y2="200" />
+      <line x1="256" y1="260" x2="447" y2="200" />
+      <line x1="256" y1="260" x2="65" y2="280" />
+      <line x1="256" y1="260" x2="447" y2="280" />
+      <line x1="256" y1="260" x2="80" y2="360" />
+      <line x1="256" y1="260" x2="432" y2="360" />
+      <line x1="256" y1="260" x2="128" y2="440" />
+      <line x1="256" y1="260" x2="384" y2="440" />
+      <line x1="256" y1="260" x2="190" y2="475" />
+      <line x1="256" y1="260" x2="322" y2="475" />
+
+      <!-- Concentric Web Rings (Scalloped Inward Arcs) -->
+      <!-- Ring 1 (Inner forehead/nose) -->
+      <path d="M 230,225 Q 256,236 282,225" />
+      <path d="M 236,290 Q 256,280 276,290" />
+
+      <!-- Ring 2 -->
+      <path d="M 205,188 Q 230,202 256,204 Q 282,202 307,188" />
+      <path d="M 220,320 Q 256,305 292,320" />
+
+      <!-- Ring 3 -->
+      <path d="M 178,145 Q 216,165 256,168 Q 296,165 334,145" />
+      <path d="M 198,356 Q 256,335 314,356" />
+
+      <!-- Ring 4 -->
+      <path d="M 148,102 Q 202,126 256,128 Q 310,126 364,102" />
+      <path d="M 172,398 Q 256,368 340,398" />
+
+      <!-- Ring 5 -->
+      <path d="M 112,65 Q 184,88 256,90 Q 328,88 400,65" />
+      <path d="M 142,438 Q 256,405 370,438" />
+
+      <!-- Ring 6 (Forehead outer) -->
+      <path d="M 160,46 Q 208,60 256,62 Q 304,60 352,46" />
+      <path d="M 180,468 Q 256,442 332,468" />
+
+      <!-- Side Cheek Webrims -->
+      <path d="M 68,230 Q 95,245 105,250" />
+      <path d="M 444,230 Q 417,245 407,250" />
+      <path d="M 72,310 Q 110,305 130,295" />
+      <path d="M 440,310 Q 402,305 382,295" />
+      <path d="M 88,375 Q 130,360 160,345" />
+      <path d="M 424,375 Q 382,360 352,345" />
+    </g>
+
+    <!-- SPIDER-MAN EYES (Iconic Sharp Angled Lenses) -->
+    <g filter="url(#eyeGlow)">
+      <!-- Left Eye Outer Frame (Black) -->
+      <path d="M 238,202 C 238,202 186,168 114,196 C 96,204 88,222 96,244 C 114,286 166,336 236,334 C 248,333 252,324 250,312 C 244,276 240,234 238,202 Z" fill="#0C0A0A" />
+
+      <!-- Left Eye Inner Lens (White/Silver) -->
+      <path d="M 226,212 C 218,210 182,185 125,207 C 114,212 110,222 115,236 C 130,270 172,312 228,312 C 235,312 237,306 236,298 C 231,268 228,236 226,212 Z" fill="url(#lensGrad)" stroke="#E2E8F0" stroke-width="2" />
+
+      <!-- Right Eye Outer Frame (Black) -->
+      <path d="M 274,202 C 274,202 326,168 398,196 C 416,204 424,222 416,244 C 398,286 346,336 276,334 C 264,333 260,324 262,312 C 268,276 272,234 274,202 Z" fill="#0C0A0A" />
+
+      <!-- Right Eye Inner Lens (White/Silver) -->
+      <path d="M 286,212 C 294,210 330,185 387,207 C 398,212 402,222 397,236 C 382,270 340,312 284,312 C 277,312 275,306 276,298 C 281,268 284,236 286,212 Z" fill="url(#lensGrad)" stroke="#E2E8F0" stroke-width="2" />
+    </g>
+  </g>
+</svg>

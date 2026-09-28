@@ -1,5 +1,5 @@
-﻿import { ChangeDetectionStrategy, Component, OnInit, effect, inject, signal } from '@angular/core';
-import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { ChangeDetectionStrategy, Component, OnInit, effect, inject, signal } from '@angular/core';
+import { NavigationEnd, NavigationStart, Router, RouterOutlet } from '@angular/router';
 import { filter } from 'rxjs';
 import { NavbarComponent } from './layout/navbar.component';
 import { FooterComponent } from './layout/footer.component';
@@ -53,6 +53,22 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     this.smooth.init();
     this.auth.reloadMe().subscribe();
+    this.router.events.pipe(filter(e => e instanceof NavigationStart)).subscribe(() => {
+      if (typeof document !== 'undefined') {
+        document.querySelectorAll<HTMLMediaElement>('audio, video').forEach(el => {
+          try {
+            el.pause();
+          } catch {}
+        });
+        document.querySelectorAll<HTMLIFrameElement>('iframe').forEach(iframe => {
+          try {
+            if (iframe.src && (iframe.src.includes('youtube') || iframe.src.includes('vimeo'))) {
+              iframe.src = 'about:blank';
+            }
+          } catch {}
+        });
+      }
+    });
     this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(e => {
       const url = (e as NavigationEnd).urlAfterRedirects;
       this.showFooter.set(!url.startsWith('/admin'));

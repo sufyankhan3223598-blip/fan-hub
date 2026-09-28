@@ -72,20 +72,6 @@ import { AuthShellComponent } from './auth-shell';
         </div>
       </form>
 
-      <div class="demo-vault">
-        <span class="demo-label">ONE-CLICK DEMO ACCESS</span>
-        <div class="demo-buttons">
-          <button type="button" class="demo-chip" (click)="fill('admin@fanhubplus.com', 'Admin@123')">
-            <app-icon name="shield" />
-            <span>Superadmin</span>
-          </button>
-          <button type="button" class="demo-chip" (click)="fill('ayesha@fanhubplus.com', 'User@123')">
-            <app-icon name="user" />
-            <span>Member</span>
-          </button>
-        </div>
-      </div>
-
       <div class="auth-bottom-link">
         <span>New to the Multiverse?</span>
         <a routerLink="/register">Create a free account</a>
@@ -320,57 +306,6 @@ import { AuthShellComponent } from './auth-shell';
       }
     }
 
-    .demo-vault {
-      margin-top: 24px;
-      padding-top: 18px;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-
-      .demo-label {
-        display: block;
-        font-size: 0.68rem;
-        font-weight: 800;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.45);
-        margin-bottom: 10px;
-      }
-
-      .demo-buttons {
-        display: flex;
-        gap: 10px;
-
-        .demo-chip {
-          flex: 1;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          padding: 8px 12px;
-          border-radius: 10px;
-          background: rgba(255, 255, 255, 0.04);
-          border: 1px solid rgba(245, 200, 106, 0.22);
-          color: rgba(255, 255, 255, 0.85);
-          font-family: var(--font-ui);
-          font-size: 0.82rem;
-          font-weight: 700;
-          cursor: pointer;
-          transition: all 0.2s ease;
-
-          app-icon {
-            color: #F5C86A;
-            font-size: 14px;
-          }
-
-          &:hover {
-            background: rgba(245, 200, 106, 0.12);
-            border-color: rgba(245, 200, 106, 0.5);
-            color: #ffffff;
-            transform: translateY(-1px);
-          }
-        }
-      }
-    }
-
     .auth-bottom-link {
       margin-top: 20px;
       text-align: center;
@@ -402,8 +337,6 @@ export class LoginComponent {
     email: ['', [Validators.required, Validators.email]],
     password: ['', Validators.required]
   });
-
-  fill(e: string, p: string): void { this.form.setValue({ email: e, password: p }); }
 
   resendVerification(): void {
     const email = this.form.controls.email.value.trim();

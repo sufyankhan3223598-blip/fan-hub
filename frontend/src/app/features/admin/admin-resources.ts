@@ -1,7 +1,7 @@
-﻿
+
 export type FieldType =
   | 'text' | 'textarea' | 'richtext' | 'number' | 'select' | 'category' | 'checkbox' | 'date' | 'datetime'
-  | 'color' | 'image' | 'tags' | 'genres' | 'timeline' | 'gallery' | 'url';
+  | 'color' | 'image' | 'tags' | 'genres' | 'timeline' | 'gallery' | 'url' | 'media-url';
 
 export interface FieldDef {
   key: string; label: string; type: FieldType; required?: boolean; options?: string[]; hint?: string;
@@ -86,7 +86,7 @@ export const RESOURCES: Record<string, ResourceConfig> = {
       { key: 'title', label: 'Title', type: 'text', required: true },
       { key: 'categoryId', label: 'Realm', type: 'category', required: true, half: true },
       { key: 'mediaType', label: 'Media type', type: 'select', options: MEDIA_TYPES, required: true, half: true },
-      { key: 'url', label: 'Media URL', type: 'url', required: true, hint: 'YouTube link, or a file path such as /media/video/clip.mp4' },
+      { key: 'url', label: 'Media URL', type: 'media-url', required: true, hint: 'Paste YouTube link, or upload video/audio directly from your computer.' },
       { key: 'durationSeconds', label: 'Duration (seconds)', type: 'number', min: 0, half: true },
       { key: 'contentId', label: 'Related content ID (optional)', type: 'number', min: 1, half: true },
       { key: 'description', label: 'Description', type: 'textarea', required: true },

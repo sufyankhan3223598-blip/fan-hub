@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { ApiService } from '../../core/services/api.service';
@@ -91,7 +91,7 @@ import { RevealDirective } from '../../core/directives/directives';
       <div class="page container-fh"><div class="skeleton" style="height:70vh"></div></div>
     }`
 })
-export class RealmComponent {
+export class RealmComponent implements OnDestroy {
   private api = inject(ApiService);
   private auth = inject(AuthService);
   private toast = inject(ToastService);
@@ -109,12 +109,34 @@ export class RealmComponent {
     effect(() => {
       const s = this.slug();
       untracked(() => {
+        this.teaserOpen.set(false);
+        if (typeof document !== 'undefined') {
+          document.querySelectorAll<HTMLMediaElement>('audio, video').forEach(el => {
+            try { el.pause(); el.currentTime = 0; } catch {}
+          });
+          document.querySelectorAll<HTMLIFrameElement>('iframe').forEach(iframe => {
+            try {
+              if (iframe.src && (iframe.src.includes('youtube') || iframe.src.includes('vimeo'))) {
+                iframe.src = 'about:blank';
+              }
+            } catch {}
+          });
+        }
         this.cat.set(null);
         this.api.category(s).subscribe(c => { this.cat.set(c); this.title.setTitle(`${c.name} Realm | Fan Hub Plus`); });
         this.api.characters({ category: s, pageSize: 10 }).subscribe(r => this.characters.set(r.items));
         this.api.media({ category: s, pageSize: 6 }).subscribe(r => this.media.set(r.items));
       });
     });
+  }
+
+  ngOnDestroy(): void {
+    this.teaserOpen.set(false);
+    if (typeof document !== 'undefined') {
+      document.querySelectorAll<HTMLMediaElement>('audio, video').forEach(el => {
+        try { el.pause(); } catch {}
+      });
+    }
   }
 
   playTeaser(): void { this.teaserOpen.set(true); }

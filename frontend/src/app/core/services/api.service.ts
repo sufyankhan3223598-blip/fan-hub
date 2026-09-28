@@ -1,4 +1,4 @@
-﻿import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
@@ -104,4 +104,5 @@ export class ApiService {
   adminBulkFeedback(ids: number[], status: string): Observable<void> { return this.http.post<void>(`${this.base}/admin/feedback/bulk-status`, { ids, status }); }
   adminChatQueries(q: Record<string, unknown>): Observable<Paged<ChatHistoryItem>> { return this.http.get<Paged<ChatHistoryItem>>(`${this.base}/admin/chatbot-queries`, { params: toParams(q) }); }
   adminUpload(file: File, folder: string): Observable<{ url: string }> { const f = new FormData(); f.append('file', file); return this.http.post<{ url: string }>(`${this.base}/admin/uploads`, f, { params: toParams({ folder }) }); }
+  adminUploadMedia(file: File, folder = 'media'): Observable<{ url: string }> { const f = new FormData(); f.append('file', file); return this.http.post<{ url: string }>(`${this.base}/admin/upload-media`, f, { params: toParams({ folder }) }); }
 }
