@@ -265,8 +265,9 @@ export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
           if (big) tl.fromTo(big, { xPercent: 18 }, { xPercent: -28, ease: 'none' }, 0);
           if (tl.scrollTrigger) this.triggers.push(tl.scrollTrigger);
           const tl2 = gsap.timeline({ scrollTrigger: { trigger: sec, start: 'top 85%', end: 'top 30%', scrub: 1 } });
+          const isMobile = window.innerWidth <= 768;
           tl2.fromTo(info, { y: 30, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.05, ease: 'power2.out' }, 0)
-            .fromTo(cards, { x: 120, opacity: 0, rotateY: -20 }, { x: 0, opacity: 1, rotateY: 0, stagger: 0.08, ease: 'power2.out' }, 0.1);
+            .fromTo(cards, isMobile ? { y: 25, opacity: 0 } : { x: 120, opacity: 0, rotateY: -20 }, isMobile ? { y: 0, opacity: 1, stagger: 0.06, ease: 'power2.out' } : { x: 0, opacity: 1, rotateY: 0, stagger: 0.08, ease: 'power2.out' }, 0.1);
           if (tl2.scrollTrigger) this.triggers.push(tl2.scrollTrigger);
           const tl3 = gsap.timeline({ scrollTrigger: { trigger: sec, start: 'bottom 90%', end: 'bottom 30%', scrub: 1 } });
           tl3.to(sec.querySelectorAll('.realm-sticky > *'), { opacity: 0, y: -40, ease: 'none' });

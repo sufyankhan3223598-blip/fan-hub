@@ -479,6 +479,48 @@
   }
 }
 
+@include down($bp-md) {
+  .media-card {
+    transform: none !important;
+    border-radius: 14px;
+
+    .play-dot {
+      width: 44px;
+      height: 44px;
+      font-size: 16px;
+    }
+
+    .dur, .src-badge {
+      bottom: 8px;
+      padding: 2px 7px;
+      font-size: 0.68rem;
+    }
+    .dur { right: 8px; }
+    .src-badge { left: 8px; }
+  }
+
+  .mc-body {
+    padding: 10px 12px 12px;
+
+    .card-eyebrow {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+    }
+
+    h4 {
+      font-size: 0.94rem;
+      margin: 3px 0 8px;
+      min-height: 2.5em;
+    }
+
+    .mc-meta {
+      gap: 10px;
+      font-size: 0.76rem;
+      padding-top: 8px;
+    }
+  }
+}
+
 .audio-list {
   display: flex;
   flex-direction: column;

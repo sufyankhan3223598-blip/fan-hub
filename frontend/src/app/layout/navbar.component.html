@@ -41,10 +41,6 @@
               <button type="button" [class.on]="theme.fontSize() === 'md'" (click)="theme.fontSize.set('md')" aria-label="Default text">A</button>
               <button type="button" [class.on]="theme.fontSize() === 'lg'" (click)="theme.fontSize.set('lg')" aria-label="Larger text">A+</button>
             </div>
-            <label class="toggle mt-3">
-              <input type="checkbox" [checked]="theme.userReduceMotion()" (change)="theme.userReduceMotion.set(!theme.userReduceMotion())" />
-              <span class="track"></span><span class="label">Reduce motion</span>
-            </label>
           </div>
         }
       </div>
@@ -190,8 +186,10 @@
         <a routerLink="/register" class="btn-fh btn-gold btn-sm join-btn">Join free</a>
       }
 
-      <button type="button" class="btn-icon burger" (click)="toggleDrawer()" [attr.aria-expanded]="drawer()" aria-label="Open menu">
-        <app-icon [name]="drawer() ? 'x' : 'menu'" />
+      <button type="button" class="btn-icon burger" [class.active]="drawer()" (click)="toggleDrawer()" [attr.aria-expanded]="drawer()" aria-label="Toggle navigation menu">
+        <span class="burger-bar top"></span>
+        <span class="burger-bar mid"></span>
+        <span class="burger-bar bot"></span>
       </button>
     </div>
   </div>
@@ -276,32 +274,107 @@
 </header>
 
 @if (drawer()) {
-  <div class="drawer" role="dialog" aria-modal="true" aria-label="Menu">
-    <nav class="drawer-links">
-      <a routerLink="/">Home</a>
-      @for (l of links; track l.url) { <a [routerLink]="l.url">{{ l.label }}</a> }
-      <a routerLink="/merchandise/upcoming">Upcoming releases</a>
-      <a routerLink="/faq">FAQ</a>
-      <a routerLink="/about">About & sitemap</a>
+  <div class="drawer" role="dialog" aria-modal="true" aria-label="Menu" (click)="$event.stopPropagation()">
+    @if (auth.isLoggedIn()) {
+      <div class="drawer-user-card">
+        <div class="d-user-avatar">
+          @if (auth.user()?.avatarUrl) {
+            <img [src]="auth.user()?.avatarUrl | asset" alt="" />
+          } @else {
+            <span>{{ auth.user()?.fullName | initials }}</span>
+          }
+        </div>
+        <div class="d-user-info">
+          <strong>{{ auth.user()?.fullName }}</strong>
+          <small>{{ auth.user()?.email }}</small>
+        </div>
+        <a routerLink="/dashboard" (click)="drawer.set(false)" class="d-user-dash-btn" title="Dashboard">
+          <app-icon name="dashboard" />
+        </a>
+      </div>
+    }
+
+    <nav class="drawer-links" aria-label="Mobile Navigation">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="drawer.set(false)">
+        <span class="d-link-icon"><app-icon name="home" /></span>
+        <span class="d-link-text">Home</span>
+        <span class="d-link-arrow"><app-icon name="chevron-right" /></span>
+      </a>
+      @for (l of links; track l.url) {
+        <a [routerLink]="l.url" routerLinkActive="active" (click)="drawer.set(false)">
+          <span class="d-link-icon"><app-icon [name]="navLinkIcons[l.url] || 'compass'" /></span>
+          <span class="d-link-text">{{ l.label }}</span>
+          <span class="d-link-arrow"><app-icon name="chevron-right" /></span>
+        </a>
+      }
+      <a routerLink="/merchandise/upcoming" routerLinkActive="active" (click)="drawer.set(false)">
+        <span class="d-link-icon"><app-icon name="clock" /></span>
+        <span class="d-link-text">Upcoming Releases</span>
+        <span class="d-link-arrow"><app-icon name="chevron-right" /></span>
+      </a>
+      <a routerLink="/faq" routerLinkActive="active" (click)="drawer.set(false)">
+        <span class="d-link-icon"><app-icon name="help" /></span>
+        <span class="d-link-text">FAQ &amp; Help</span>
+        <span class="d-link-arrow"><app-icon name="chevron-right" /></span>
+      </a>
+      <a routerLink="/about" routerLinkActive="active" (click)="drawer.set(false)">
+        <span class="d-link-icon"><app-icon name="info" /></span>
+        <span class="d-link-text">About &amp; Sitemap</span>
+        <span class="d-link-arrow"><app-icon name="chevron-right" /></span>
+      </a>
     </nav>
-    <span class="dd-label">Realms</span>
+
+    <div class="drawer-section-title">
+      <span>✦ Multiverse Realms</span>
+    </div>
     <div class="drawer-realms">
       @for (c of cats.categories(); track c.id) {
-        <a [routerLink]="['/realm', c.slug]" [style.--accent]="c.accentColor"><app-icon [name]="icons[c.slug] || 'sparkles'" /> {{ c.name }}</a>
+        <a [routerLink]="['/realm', c.slug]" (click)="drawer.set(false)" [style.--accent]="c.accentColor">
+          <span class="d-realm-ico"><app-icon [name]="icons[c.slug] || 'sparkles'" /></span>
+          <span class="d-realm-name">{{ c.name }}</span>
+        </a>
       }
     </div>
+
     <div class="drawer-display">
-      <div class="seg font-seg">
-        <button type="button" (click)="theme.stepFont(-1)" aria-label="Smaller text">A-</button>
-        <button type="button" (click)="theme.stepFont(0)" aria-label="Default text">A</button>
-        <button type="button" (click)="theme.stepFont(1)" aria-label="Larger text">A+</button>
+      <div class="drawer-display-row">
+        <span class="dd-label">Text Size</span>
+        <div class="seg font-seg">
+          <button type="button" [class.on]="theme.fontSize() === 'sm'" (click)="theme.fontSize.set('sm')" aria-label="Smaller text">A-</button>
+          <button type="button" [class.on]="theme.fontSize() === 'md'" (click)="theme.fontSize.set('md')" aria-label="Default text">A</button>
+          <button type="button" [class.on]="theme.fontSize() === 'lg'" (click)="theme.fontSize.set('lg')" aria-label="Larger text">A+</button>
+        </div>
+      </div>
+
+      <div class="drawer-display-row mt-2">
+        <span class="dd-label">Color Mode</span>
+        <div class="seg theme-seg">
+          <button type="button" [class.on]="theme.theme() === 'dark'" (click)="theme.setTheme('dark')" aria-label="Dark mode">
+            <app-icon name="moon" /> Dark
+          </button>
+          <button type="button" [class.on]="theme.theme() === 'light'" (click)="theme.setTheme('light')" aria-label="Light mode">
+            <app-icon name="sun" /> Light
+          </button>
+        </div>
       </div>
     </div>
+
     @if (!auth.isLoggedIn()) {
-      <div class="d-flex gap-2 mt-3">
-        <a routerLink="/login" class="btn-fh flex-fill">Login</a>
-        <a routerLink="/register" class="btn-fh btn-gold flex-fill">Join free</a>
+      <div class="drawer-auth-btns">
+        <a routerLink="/login" (click)="drawer.set(false)" class="btn-fh flex-fill">Login</a>
+        <a routerLink="/register" (click)="drawer.set(false)" class="btn-fh btn-gold flex-fill">Join Free</a>
+      </div>
+    } @else {
+      <div class="drawer-auth-btns">
+        <a routerLink="/dashboard" (click)="drawer.set(false)" class="btn-fh flex-fill">Dashboard</a>
+        @if (auth.isAdmin()) {
+          <a routerLink="/admin" (click)="drawer.set(false)" class="btn-fh btn-gold flex-fill">Admin</a>
+        }
+        <button type="button" (click)="logout(); drawer.set(false)" class="btn-fh btn-danger flex-fill">
+          <app-icon name="logout" /> Sign Out
+        </button>
       </div>
     }
   </div>
 }
+

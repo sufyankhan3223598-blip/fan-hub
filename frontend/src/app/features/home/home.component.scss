@@ -1,7 +1,7 @@
-﻿@use 'mixins' as *;
+@use 'mixins' as *;
 
-:host { display: block; }
-.home { position: relative; }
+:host { display: block; overflow-x: clip; width: 100%; }
+.home { position: relative; overflow-x: clip; width: 100%; }
 
 .webgl { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; display: block; outline: none; }
 .webgl-vignette { position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -448,6 +448,45 @@ section { position: relative; z-index: 1; }
   }
 }
 
+@include down($bp-sm) {
+  .s-hero {
+    padding: calc(var(--nav-h) + 1.2rem) 16px 2.5rem;
+  }
+  .hero-badge {
+    padding: 6px 14px;
+    font-size: 0.72rem;
+  }
+  .hero-title {
+    font-size: clamp(2rem, 8.5vw, 2.75rem);
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+  .hero-desc {
+    font-size: 0.88rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    padding: 0 4px;
+  }
+  .hero-actions {
+    gap: 10px;
+    margin-bottom: 22px;
+    width: 100%;
+    .btn-primary-hero, .btn-glass-hero {
+      width: 100%;
+      max-width: 280px;
+      padding: 11px 20px;
+      font-size: 0.90rem;
+    }
+  }
+  .hero-social {
+    font-size: 0.82rem;
+    .avatar-thumb {
+      width: 28px;
+      height: 28px;
+    }
+  }
+}
+
 .realm-gateway-divider {
   position: relative;
   z-index: 10;
@@ -584,6 +623,19 @@ section { position: relative; z-index: 1; }
       box-shadow: 0 0 30px rgba(245, 200, 106, 0.4), 0 0 45px rgba(192, 132, 252, 0.35);
     }
   }
+
+  @include down($bp-sm) {
+    padding: 1.4rem 12px;
+    .divider-glow-bar { width: 90%; }
+    .divider-content { gap: 8px; width: 100%; }
+    .portal-badge {
+      padding: 6px 14px;
+      gap: 8px;
+      .portal-icon { font-size: 0.88rem; }
+      .portal-title { font-size: 0.68rem; letter-spacing: 0.16em; }
+      .portal-subtitle { font-size: 0.56rem; letter-spacing: 0.16em; }
+    }
+  }
 }
 
 @keyframes pulsePortal {
@@ -619,7 +671,11 @@ section { position: relative; z-index: 1; }
   }
 }
 
-.s-realm { height: 230vh; }
+.s-realm {
+  height: 230vh;
+  overflow-x: clip;
+  position: relative;
+}
 .realm-sticky {
   position: sticky;
   top: var(--nav-h);
@@ -628,10 +684,13 @@ section { position: relative; z-index: 1; }
   align-items: center;
   padding: clamp(0.75rem, 2vh, 1.5rem) 0;
   box-sizing: border-box;
+  overflow-x: clip;
 }
 .realm-big {
   position: absolute; top: 50%; left: 0; transform: translateY(-50%); white-space: nowrap; pointer-events: none; z-index: -1;
   @include display(clamp(6rem, 22vw, 20rem)); -webkit-text-stroke: 2px color-mix(in srgb, var(--accent) 55%, transparent); opacity: 0.55;
+  max-width: 100vw;
+  overflow: hidden;
 }
 .realm-layout { width: 100%; }
 .realm-info {
@@ -792,7 +851,149 @@ section { position: relative; z-index: 1; }
   }
 }
 @include down($bp-lg) {
-  .realm-info { background: linear-gradient(90deg, rgba(7, 7, 12, 0.75), transparent); padding: 20px; border-radius: 20px; padding-top: var(--nav-h); }
+  .realm-big {
+    font-size: clamp(3.5rem, 14vw, 7rem) !important;
+    opacity: 0.28;
+  }
+  .realm-layout {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .realm-info {
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    pointer-events: none;
+    > * {
+      pointer-events: auto;
+    }
+  }
+  .s-globe { padding: 60px 0; }
+  .globe-layout { grid-template-columns: 1fr; gap: 24px; }
+  .globe-stage { width: 100%; max-width: 100%; overflow: hidden; }
+}
+
+@include down($bp-sm) {
+  .s-realm {
+    height: 200vh;
+  }
+  .realm-sticky {
+    padding: 10px 0 12px;
+    height: calc(100vh - var(--nav-h));
+    align-items: stretch;
+  }
+  .realm-info {
+    justify-content: flex-start !important;
+
+    .eyebrow {
+      font-size: 0.70rem;
+      letter-spacing: 0.16em;
+      margin-bottom: 2px;
+      text-shadow: 0 0 14px var(--accent);
+      flex: none;
+    }
+  }
+  .realm-title {
+    font-size: clamp(1.85rem, 7vw, 2.4rem) !important;
+    margin-bottom: 2px !important;
+    line-height: 1.05;
+    text-shadow: 0 0 30px color-mix(in srgb, var(--accent) 85%, transparent), 0 2px 14px rgba(0, 0, 0, 0.95);
+    flex: none;
+  }
+  .realm-tagline {
+    font-size: 0.88rem;
+    margin-bottom: 0 !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+    flex: none;
+  }
+  .realm-desc {
+    display: none !important;
+  }
+  .realm-info > .btn-fh {
+    margin-top: auto !important;
+    margin-bottom: 8px !important;
+    height: 38px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    align-self: center !important;
+    padding: 0 24px;
+    border-radius: 999px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.7), 0 0 20px rgba(245, 200, 106, 0.35);
+    flex: none;
+  }
+  .realm-cards {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    width: 100% !important;
+    flex: none;
+
+    .realm-card {
+      height: auto !important;
+    }
+  }
+
+  .s-coverflow { height: 190vh; }
+  .cover-sticky { padding-top: calc(var(--nav-h) + 12px); }
+  .coverflow { height: min(44vh, 360px); }
+  .cover-item { width: clamp(150px, 46vw, 200px); }
+}
+
+:host ::ng-deep .realm-cards {
+  @include down($bp-sm) {
+    .dual-card {
+      border-radius: 12px !important;
+      background: rgba(14, 12, 22, 0.88) !important;
+      backdrop-filter: blur(14px) !important;
+      border: 1px solid rgba(255, 255, 255, 0.12) !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7) !important;
+
+      .media {
+        height: 65px !important;
+        min-height: 65px !important;
+        max-height: 65px !important;
+        aspect-ratio: 16 / 9 !important;
+      }
+
+      .body {
+        padding: 5px 8px 6px !important;
+        gap: 1px !important;
+      }
+
+      .card-eyebrow {
+        font-size: 0.58rem !important;
+        letter-spacing: 0.08em !important;
+        margin-bottom: 0 !important;
+      }
+
+      .card-title {
+        font-size: 0.76rem !important;
+        line-height: 1.2 !important;
+        height: auto !important;
+        min-height: auto !important;
+        max-height: 2.4em !important;
+        -webkit-line-clamp: 2 !important;
+        margin: 1px 0 !important;
+      }
+
+      .card-meta {
+        padding-top: 2px !important;
+        font-size: 0.66rem !important;
+        gap: 6px !important;
+      }
+    }
+  }
 }
 
 .s-coverflow { height: 260vh; }

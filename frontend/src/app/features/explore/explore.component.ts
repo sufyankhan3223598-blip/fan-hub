@@ -1,4 +1,4 @@
-﻿import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CategoryStore, REALM_ICONS } from '../../core/services/stores';
 import { AuthService } from '../../core/services/auth.service';

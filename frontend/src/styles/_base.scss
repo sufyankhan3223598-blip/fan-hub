@@ -5,6 +5,7 @@
 html {
   -webkit-text-size-adjust: 100%;
   scroll-behavior: auto;
+  overflow-x: clip;
 }
 
 html.lenis, html.lenis body { height: auto; }
@@ -22,6 +23,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: clip;
+  position: relative;
+  width: 100%;
   transition: background-color 0.4s var(--ease-out), color 0.4s var(--ease-out);
 }
 

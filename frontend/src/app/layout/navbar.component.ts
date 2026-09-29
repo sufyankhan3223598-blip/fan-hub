@@ -1,4 +1,4 @@
-﻿import { ChangeDetectionStrategy, Component, ElementRef, HostListener, OnDestroy, OnInit, effect, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, HostListener, OnDestroy, OnInit, effect, inject, signal, viewChild } from '@angular/core';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { Subject, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, catchError, filter } from 'rxjs/operators';
@@ -60,6 +60,18 @@ export class NavbarComponent implements OnInit, OnDestroy {
     { label: 'Merchandise', url: '/merchandise' }
   ];
 
+  readonly navLinkIcons: Record<string, string> = {
+    '/explore': 'compass',
+    '/media': 'play',
+    '/characters': 'user',
+    '/articles': 'feather',
+    '/events': 'calendar',
+    '/merchandise': 'tag',
+    '/merchandise/upcoming': 'clock',
+    '/faq': 'help',
+    '/about': 'info'
+  };
+
   constructor() {
     effect(() => { if (this.auth.isLoggedIn()) this.notes.refresh(); });
 
@@ -102,7 +114,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   onScroll(): void {
     const y = window.scrollY;
     this.scrolled.set(y > 30);
-    this.hidden.set(y > 400 && y > this.lastY + 4 && !this.mega() && this.menu() === 'none');
+    this.hidden.set(y > 400 && y > this.lastY + 4 && !this.mega() && !this.drawer() && this.menu() === 'none');
     if (y < this.lastY - 4) this.hidden.set(false);
     this.lastY = y;
   }
@@ -165,8 +177,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   toggleDrawer(): void {
+    this.menu.set('none');
+    this.mega.set(false);
+    this.searchBarOpen.set(false);
     this.drawer.update(v => !v);
-    document.body.style.overflow = this.drawer() ? 'hidden' : '';
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = this.drawer() ? 'hidden' : '';
+    }
   }
 
   openNotification(id: number, url?: string | null): void {

@@ -223,6 +223,12 @@
   position: relative;
   overflow: hidden;
 
+  @media (max-width: 600px) {
+    padding: 16px 14px;
+    border-radius: 18px;
+    min-height: auto;
+  }
+
   &::before {
     content: '';
     position: absolute;

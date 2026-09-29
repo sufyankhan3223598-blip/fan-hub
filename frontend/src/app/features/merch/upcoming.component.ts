@@ -1,4 +1,4 @@
-﻿import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ApiService } from '../../core/services/api.service';
 import { Upcoming } from '../../core/models/models';
@@ -65,6 +65,12 @@ import { AssetPipe } from '../../core/pipes/pipes';
     .card-eyebrow { font-family: var(--font-ui); font-size: .72rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
     .date { color: var(--text-2); font-size: .9rem; em { font-style: normal; font-size: .7rem; letter-spacing: .12em; text-transform: uppercase; color: var(--warning); margin-left: 6px; } }
     .desc { font-size: .9rem; color: var(--muted); } .studio { margin: 10px 0 0; font-size: .8rem; color: var(--muted); }
+    @media (max-width: 768px) {
+      .next { min-height: 260px; }
+      .next-body { padding: 16px 14px; h2 { font-size: 1.35rem; } p { font-size: 0.85rem; } }
+      .up { transform: none !important; }
+      .up-body { padding: 12px 14px 14px; h3 { font-size: 1.02rem; } .desc { font-size: 0.82rem; } }
+    }
   `]
 })
 export class UpcomingComponent {

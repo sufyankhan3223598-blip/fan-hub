@@ -1,0 +1,1 @@
+import{a}from"./chunk-3ZW7CPXG.js";import"./chunk-QNULYWBS.js";import"./chunk-BAUTIIRJ.js";import"./chunk-GJH57CPL.js";import"./chunk-F2OMLFXA.js";import"./chunk-YQL2HOGP.js";import"./chunk-RFZUY67D.js";import"./chunk-AJHYUIOB.js";import"./chunk-BZYVF3XM.js";import"./chunk-TVCQ4WEP.js";import"./chunk-CYZZIWZP.js";import"./chunk-J2YZF7XI.js";export{a as AdminCrudComponent};

@@ -1,4 +1,4 @@
-﻿import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, NgZone, OnDestroy, effect, inject, input, viewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, NgZone, OnDestroy, effect, inject, input, viewChild } from '@angular/core';
 import * as THREE from 'three';
 import { buildEmblem, buildRealmProps, REALM_STYLES, updateProps } from '../../core/three/realm-props';
 import { energyCore, glow, metal, particles } from '../../core/three/materials';

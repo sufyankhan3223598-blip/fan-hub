@@ -46,8 +46,7 @@
             <div><span class="field-label d-block mb-2">Font size</span>
               <div class="seg"><button type="button" [class.on]="theme.fontSize() === 'sm'" (click)="theme.fontSize.set('sm')">A-</button><button type="button" [class.on]="theme.fontSize() === 'md'" (click)="theme.fontSize.set('md')">A</button><button type="button" [class.on]="theme.fontSize() === 'lg'" (click)="theme.fontSize.set('lg')">A+</button></div></div>
           </div>
-          <label class="toggle mt-4"><input type="checkbox" [checked]="theme.userReduceMotion()" (change)="theme.userReduceMotion.set(!theme.userReduceMotion())" /><span class="track"></span><span class="label">Reduce motion (static 3D scenes)</span></label>
-          <label class="toggle mt-3 d-flex"><input type="checkbox" [checked]="emailNotifications()" (change)="emailNotifications.set(!emailNotifications())" /><span class="track"></span><span class="label">Email notifications</span></label>
+          <label class="toggle mt-4 d-flex"><input type="checkbox" [checked]="emailNotifications()" (change)="emailNotifications.set(!emailNotifications())" /><span class="track"></span><span class="label">Email notifications</span></label>
           <button type="button" class="btn-fh btn-ghost mt-4" (click)="savePrefs()"><app-icon name="check" /> Save preferences</button>
         </div>
 

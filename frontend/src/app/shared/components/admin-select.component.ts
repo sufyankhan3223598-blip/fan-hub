@@ -1,4 +1,4 @@
-﻿import { ChangeDetectionStrategy, Component, ElementRef, HostListener, computed, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, HostListener, computed, inject, input, output, signal } from '@angular/core';
 import { IconComponent } from './icon.component';
 
 export interface AdminSelectOption {
@@ -148,6 +148,10 @@ export interface AdminSelectOption {
       padding: 5px;
       animation: menuFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       backdrop-filter: blur(20px);
+
+      @media (max-width: 768px) {
+        max-width: min(290px, calc(100vw - 32px));
+      }
     }
 
     @keyframes menuFadeIn {

@@ -78,15 +78,17 @@ import { RevealDirective } from '../../core/directives/directives';
         }
       </div>
 
-      <app-modal [open]="teaserOpen()" [title]="c.name + ' teaser'" size="lg" (closed)="teaserOpen.set(false)">
-        @if (teaser(); as t) {
-          @if (t.locked) {
-            <p class="text-center">Media playback is for members. <a routerLink="/login">Sign in</a> to watch the teaser.</p>
-          } @else {
-            <app-video-player [url]="t.url ?? ''" [posterUrl]="t.imageUrl" [embedType]="t.embedType" [title]="t.title" [autoplay]="true" />
+      @if (teaserOpen()) {
+        <app-modal [open]="teaserOpen()" [title]="c.name + ' teaser'" size="lg" (closed)="closeTeaser()">
+          @if (teaser(); as t) {
+            @if (t.locked) {
+              <p class="text-center">Media playback is for members. <a routerLink="/login">Sign in</a> to watch the teaser.</p>
+            } @else {
+              <app-video-player [url]="t.url ?? ''" [posterUrl]="t.imageUrl" [embedType]="t.embedType" [title]="t.title" [autoplay]="true" />
+            }
           }
-        }
-      </app-modal>
+        </app-modal>
+      }
     } @else {
       <div class="page container-fh"><div class="skeleton" style="height:70vh"></div></div>
     }`
@@ -109,19 +111,7 @@ export class RealmComponent implements OnDestroy {
     effect(() => {
       const s = this.slug();
       untracked(() => {
-        this.teaserOpen.set(false);
-        if (typeof document !== 'undefined') {
-          document.querySelectorAll<HTMLMediaElement>('audio, video').forEach(el => {
-            try { el.pause(); el.currentTime = 0; } catch {}
-          });
-          document.querySelectorAll<HTMLIFrameElement>('iframe').forEach(iframe => {
-            try {
-              if (iframe.src && (iframe.src.includes('youtube') || iframe.src.includes('vimeo'))) {
-                iframe.src = 'about:blank';
-              }
-            } catch {}
-          });
-        }
+        this.closeTeaser();
         this.cat.set(null);
         this.api.category(s).subscribe(c => { this.cat.set(c); this.title.setTitle(`${c.name} Realm | Fan Hub Plus`); });
         this.api.characters({ category: s, pageSize: 10 }).subscribe(r => this.characters.set(r.items));
@@ -131,15 +121,26 @@ export class RealmComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.teaserOpen.set(false);
-    if (typeof document !== 'undefined') {
-      document.querySelectorAll<HTMLMediaElement>('audio, video').forEach(el => {
-        try { el.pause(); } catch {}
-      });
-    }
+    this.closeTeaser();
   }
 
   playTeaser(): void { this.teaserOpen.set(true); }
+
+  closeTeaser(): void {
+    this.teaserOpen.set(false);
+    if (typeof document !== 'undefined') {
+      document.querySelectorAll<HTMLMediaElement>('audio, video').forEach(el => {
+        try { el.pause(); el.currentTime = 0; } catch {}
+      });
+      document.querySelectorAll<HTMLIFrameElement>('iframe').forEach(iframe => {
+        try {
+          if (iframe.src && (iframe.src.includes('youtube') || iframe.src.includes('vimeo'))) {
+            iframe.src = 'about:blank';
+          }
+        } catch {}
+      });
+    }
+  }
 
   follow(): void {
     const u = this.auth.user();

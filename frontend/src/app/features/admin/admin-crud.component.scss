@@ -17,8 +17,10 @@ code { font-size: 0.8rem; color: #8e95a5; font-family: monospace; }
   &.half { grid-column: span 1; }
   @media (max-width: 640px) { &.half { grid-column: span 1; } grid-column: span 1; }
   .field-label {
-    font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #cbd5e1;
-    i { color: #f59e0b; font-style: normal; margin-left: 4px; font-weight: 800; }
+    font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--gold-2, #F5C86A);
+    text-shadow: 0 0 10px rgba(245, 200, 106, 0.25);
+    i { color: var(--gold, #D4AF37); font-style: normal; margin-left: 4px; font-weight: 800; text-shadow: 0 0 6px rgba(245, 200, 106, 0.6); }
   }
   .field-hint { font-size: 0.76rem; color: #8e95a5; margin-top: 2px; }
   .field-error { font-size: 0.78rem; color: #fb7185; font-weight: 600; margin-top: 2px; }

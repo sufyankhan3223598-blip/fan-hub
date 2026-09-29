@@ -292,3 +292,138 @@
     }
   }
 }
+
+@media (max-width: 768px) {
+  .flip-card {
+    border-radius: 16px;
+  }
+
+  .front-info {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+
+    h3 {
+      font-size: 1.05rem;
+    }
+
+    .role {
+      font-size: 0.74rem;
+    }
+  }
+
+  .card-eyebrow {
+    font-size: 0.65rem;
+  }
+
+  .flip-btn {
+    top: 8px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+  }
+
+  .back-content {
+    padding: 10px 12px 10px;
+
+    h3 {
+      font-size: 0.95rem;
+    }
+
+    .power {
+      font-size: 0.74rem;
+      margin-bottom: 5px;
+    }
+  }
+
+  .stat {
+    font-size: 0.68rem;
+    gap: 4px;
+    grid-template-columns: 26px 1fr 22px;
+  }
+
+  .back-actions {
+    margin-top: 4px;
+
+    .profile-btn {
+      height: 28px;
+      padding: 0 10px;
+      font-size: 0.72rem;
+    }
+    app-bookmark-button ::ng-deep .btn-icon.sm {
+      width: 28px;
+      height: 28px;
+    }
+    .flip-back-btn {
+      width: 28px;
+      height: 28px;
+    }
+  }
+}
+
+@media (max-width: 576px) {
+  .flip-card {
+    border-radius: 14px;
+  }
+
+  .front-info {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+
+    h3 {
+      font-size: 0.95rem;
+      letter-spacing: 0.01em;
+    }
+
+    .role {
+      font-size: 0.68rem;
+    }
+  }
+
+  .back-content {
+    padding: 8px 10px 8px;
+
+    h3 {
+      font-size: 0.88rem;
+      margin: 1px 0 2px;
+    }
+
+    .power {
+      font-size: 0.70rem;
+      -webkit-line-clamp: 1;
+      margin-bottom: 3px;
+    }
+  }
+
+  .stats {
+    gap: 3px;
+  }
+
+  .stat {
+    font-size: 0.62rem;
+    grid-template-columns: 22px 1fr 18px;
+    span { font-size: 0.60rem; }
+    b { font-size: 0.62rem; }
+    .bar { height: 3px; }
+  }
+
+  .back-actions {
+    gap: 4px;
+    margin-top: 3px;
+
+    .profile-btn {
+      height: 24px;
+      padding: 0 8px;
+      font-size: 0.66rem;
+    }
+    app-bookmark-button ::ng-deep .btn-icon.sm {
+      width: 24px;
+      height: 24px;
+    }
+    .flip-back-btn {
+      width: 24px;
+      height: 24px;
+    }
+  }
+}

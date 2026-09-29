@@ -1,4 +1,4 @@
-﻿import * as THREE from 'three';
+import * as THREE from 'three';
 import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
@@ -406,8 +406,16 @@ export class HomeScene {
       const from = i === 0 ? -6 : realmZ(i - 1) + 8;
       const to = realmZ(i) + 8;
       const z = lerp(from, to, fly) - clamp01((local - 0.22) / 0.78) * 2.2;
-      cam.set(this.mouseLerp.x * 0.8 - 0.4, 0.4 + this.mouseLerp.y * 0.5, z);
-      look.set(1.0, 0, z - 9);
+      if (isMobile) {
+        cam.set(2.8 + this.mouseLerp.x * 0.35, -0.25 + this.mouseLerp.y * 0.25, z + 2.2);
+        look.set(2.8, 0.55, z - 9);
+      } else if (isTablet) {
+        cam.set(1.5 + this.mouseLerp.x * 0.5, 0.2 + this.mouseLerp.y * 0.35, z + 1.2);
+        look.set(2.2, 0.25, z - 9);
+      } else {
+        cam.set(this.mouseLerp.x * 0.8 - 0.4, 0.4 + this.mouseLerp.y * 0.5, z);
+        look.set(1.0, 0, z - 9);
+      }
     } else {
 
       const k = Math.min(2.5, t - 9);

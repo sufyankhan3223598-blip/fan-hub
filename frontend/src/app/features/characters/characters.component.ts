@@ -1,4 +1,4 @@
-﻿import { ChangeDetectionStrategy, Component, ElementRef, HostListener, effect, inject, input, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, HostListener, effect, inject, input, signal, untracked } from '@angular/core';
 import { ApiService } from '../../core/services/api.service';
 import { CategoryStore } from '../../core/services/stores';
 import { CharacterCard, Paged } from '../../core/models/models';
